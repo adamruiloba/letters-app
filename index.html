@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Letters</title>
+<style>
+  :root {
+    --sky: #cfe8ff;
+    --ink: #1d2b53;
+    --paper: #fffdf7;
+    --c: #ef476f;   /* current letter color */
+    --d: #b32d4e;   /* darker shade for the "sticker" edge */
+    --font: "Arial Rounded MT Bold", "Nunito", "Trebuchet MS", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--sky);
+    color: var(--ink);
+    font-family: var(--font);
+    -webkit-tap-highlight-color: transparent;
+  }
+  [hidden] { display: none !important; }
+  button { font-family: inherit; cursor: pointer; }
+  button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+
+  /* ---------- Home grid ---------- */
+  .top {
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 760px; margin: 0 auto; padding: 18px 18px 6px;
+  }
+  h1 { margin: 0; font-size: clamp(2rem, 7vw, 3rem); letter-spacing: 0.02em; }
+  .pill {
+    border: 0; background: var(--paper); color: var(--ink);
+    font-size: 1.3rem; padding: 10px 18px; border-radius: 999px;
+    box-shadow: 0 4px 0 rgba(29,43,83,.25);
+  }
+  .pill:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(29,43,83,.25); }
+
+  #grid, #tgridTiles {
+    max-width: 640px; margin: 0 auto; padding: 14px 18px 40px;
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .tile {
+    position: relative; aspect-ratio: 1; border: 0; border-radius: 22px;
+    background: var(--c); color: #fff;
+    font-size: clamp(3rem, 15vw, 5.6rem);
+    box-shadow: 0 6px 0 var(--d);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .tile:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--d); }
+  .bounce { animation: bounce .35s; }
+  @keyframes bounce { 40% { transform: scale(1.12); } }
+  .tile.done::after {
+    content: "\2605"; position: absolute; top: 4px; right: 9px;
+    font-size: 1.3rem; color: #fff6b0; text-shadow: 0 1px 0 var(--d);
+  }
+
+  /* ---------- Letter view ---------- */
+  #view { max-width: 560px; margin: 0 auto; padding: 14px 16px 36px; text-align: center; }
+  .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .bar .pill { font-size: 1.1rem; padding: 9px 16px; }
+
+  .word { margin: 14px 0 12px; display: flex; align-items: center; justify-content: center; gap: 14px; }
+  #pic { font-size: clamp(3rem, 12vw, 4.5rem); line-height: 1; border: 0; background: none; padding: 0; }
+  #caption { font-size: clamp(1.4rem, 5vw, 2rem); }
+  #caption b { color: var(--c); font-size: 1.25em; }
+
+  #stage {
+    position: relative; margin: 0 auto;
+    width: min(92vw, 56vh, 440px); aspect-ratio: 1;
+    background: var(--paper); border-radius: 28px;
+    box-shadow: 0 8px 0 var(--d);
+  }
+  #stage canvas { position: absolute; inset: 0; border-radius: 28px; }
+  #draw { touch-action: none; cursor: crosshair; }
+  #hand { pointer-events: none; }
+
+  .meter {
+    width: min(92vw, 440px); height: 16px; margin: 22px auto 8px;
+    background: rgba(255,255,255,.7); border-radius: 999px; overflow: hidden;
+  }
+  #fill { height: 100%; width: 0; background: var(--c); border-radius: 999px; transition: width .25s; }
+  #hint { min-height: 1.6em; margin: 0 0 12px; font-size: 1.1rem; }
+
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .big {
+    border: 0; border-radius: 18px; padding: 14px 22px; font-size: 1.25rem;
+    background: var(--c); color: #fff; box-shadow: 0 5px 0 var(--d);
+  }
+  .big:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--d); }
+  .big.alt { background: var(--paper); color: var(--ink); box-shadow: 0 5px 0 rgba(29,43,83,.25); }
+
+
+  .feat {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    border: 0; border-radius: 22px; padding: 10px 26px; font-size: 1rem;
+    background: var(--c); color: #fff; box-shadow: 0 5px 0 var(--d);
+  }
+  .feat:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--d); }
+  .feat .ficon { font-size: 2.4rem; line-height: 1.15; }
+  .feat.ear { background: var(--paper); color: var(--ink); box-shadow: 0 5px 0 rgba(29,43,83,.25); }
+  .feat.ear:active { box-shadow: 0 1px 0 rgba(29,43,83,.25); }
+
+  /* ---------- Learn mode ---------- */
+  .modes { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; max-width: 640px; margin: 4px auto 0; padding: 0 18px; }
+  .modes .pill { font-size: 1.05rem; padding: 9px 16px; }
+  .tile.locked { opacity: .3; filter: saturate(.4); }
+  .tile.locked:active { transform: none; box-shadow: 0 6px 0 var(--d); }
+  .tile.current { outline: 5px solid var(--ink); outline-offset: 3px; animation: glow 1.4s ease-in-out infinite; z-index: 1; }
+  .tile.current.bounce { animation: bounce .35s; }
+  @keyframes glow { 50% { transform: scale(1.07); } }
+  .dots { position: absolute; left: 0; right: 0; bottom: 7px; display: flex; justify-content: center; gap: 4px; pointer-events: none; }
+  .dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); }
+  .dots i.on { background: #fff; }
+
+  /* ---------- Dashboard ---------- */
+  #dash { max-width: 760px; margin: 0 auto; padding: 26px 18px 40px; text-align: center; }
+  #dash h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); }
+  .cards {
+    margin-top: 24px; display: grid; gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  }
+  .card {
+    border: 0; border-radius: 30px; padding: 26px 14px 22px;
+    background: var(--c); color: #fff; box-shadow: 0 8px 0 var(--d);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .card:active { transform: translateY(7px); box-shadow: 0 1px 0 var(--d); }
+  .card .cicon { font-size: 4.6rem; line-height: 1.15; }
+  .card .cicon.abc { font-size: 3.4rem; letter-spacing: 0.04em; line-height: 1.5; }
+  .card .clabel { font-size: 1.7rem; }
+
+  /* ---------- Draw ---------- */
+  #paint { max-width: 560px; margin: 0 auto; padding: 14px 16px 36px; text-align: center; }
+  #paintStage {
+    position: relative; margin: 14px auto 0;
+    width: min(92vw, 56vh, 520px); aspect-ratio: 1;
+    background: var(--paper); border-radius: 28px; box-shadow: 0 8px 0 #b9c7e6;
+  }
+  #paintCanvas { display: block; border-radius: 28px; touch-action: none; cursor: crosshair; }
+  .palette { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px auto 0; max-width: 480px; }
+  .sw {
+    width: 46px; height: 46px; border-radius: 50%; border: 3px solid #fff;
+    background: var(--sw); box-shadow: 0 3px 0 rgba(29,43,83,.25);
+  }
+  .sw.sel, .sz.sel, .pill.sel { outline: 4px solid var(--ink); outline-offset: 2px; }
+  .sz {
+    width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--paper);
+    display: grid; place-items: center; box-shadow: 0 3px 0 rgba(29,43,83,.25);
+  }
+  .sz i { display: block; border-radius: 50%; background: var(--ink); }
+
+  /* ---------- Game ---------- */
+  #game { max-width: 620px; margin: 0 auto; padding: 14px 16px 36px; text-align: center; --c: #7b5cff; --d: #5238c7; }
+  .score { font-size: 1.5rem; background: var(--paper); border-radius: 999px; padding: 8px 18px; box-shadow: 0 4px 0 rgba(29,43,83,.25); }
+  #listen { margin: 34px auto 10px; padding: 14px 34px; }
+  #listen .ficon { font-size: 3.2rem; }
+  #choices { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 30px; }
+  #choices .tile { width: clamp(92px, 27vw, 150px); font-size: clamp(3rem, 12vw, 5.2rem); }
+  .shake { animation: shake .4s; }
+  @keyframes shake { 25% { transform: translateX(-9px); } 75% { transform: translateX(9px); } }
+
+  /* ---------- Celebration ---------- */
+  .pop {
+    position: fixed; top: -40px; font-size: 2rem; pointer-events: none; z-index: 10;
+    animation: fall 1.8s ease-in forwards;
+  }
+  @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .pop { display: none; }
+    .shake, .bounce, .tile.current, .tile.current.bounce { animation: none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Dashboard: the first screen -->
+<section id="dash">
+  <h1>Let's play!</h1>
+  <div class="cards">
+    <button class="card" id="goLetters" style="--c:#ef476f;--d:#b32d4e" aria-label="Letters">
+      <span class="cicon abc">ABC</span><span class="clabel">Letters</span>
+    </button>
+    <button class="card" id="goPaint" style="--c:#06a99a;--d:#04776c" aria-label="Draw">
+      <span class="cicon">&#127912;</span><span class="clabel">Draw</span>
+    </button>
+    <button class="card" id="goGame" style="--c:#7b5cff;--d:#5238c7" aria-label="Letter game">
+      <span class="cicon">&#128269;</span><span class="clabel">Letter Game</span>
+    </button>
+  </div>
+</section>
+
+<!-- Draw: pick a letter to trace -->
+<section id="tgrid" hidden>
+  <div class="top">
+    <button class="pill" id="tHome">&larr; Home</button>
+    <h1>Draw</h1>
+    <button class="pill" id="caseBtn2" aria-label="Switch between capital and small letters">Aa</button>
+  </div>
+  <div class="modes">
+    <button class="pill" id="freeDraw">&#127912; Free draw</button>
+  </div>
+  <div id="tgridTiles"></div>
+</section>
+
+<!-- Letters: A–Z grid -->
+<section id="letters" hidden>
+  <div class="top">
+    <button class="pill" id="lHome">&larr; Home</button>
+    <h1>Letters</h1>
+    <button class="pill" id="caseBtn" aria-label="Switch between capital and small letters">Aa</button>
+  </div>
+  <div class="modes">
+    <button class="pill sel" id="modeFree">Free play</button>
+    <button class="pill" id="modeLearn">Learn in order</button>
+    <button class="pill" id="learnReset" hidden>Start over</button>
+  </div>
+  <div id="grid"></div>
+</section>
+
+<!-- One letter -->
+<section id="view" hidden>
+  <div class="bar">
+    <button class="pill" id="back">&larr; All letters</button>
+    <span>
+      <button class="pill" id="prev" aria-label="Previous letter">&lsaquo;</button>
+      <button class="pill" id="next" aria-label="Next letter">&rsaquo;</button>
+    </span>
+  </div>
+
+  <div class="word">
+    <button id="pic" aria-label="Hear the word"></button>
+    <div id="caption"></div>
+  </div>
+
+  <div id="stage">
+    <canvas id="guide"></canvas>
+    <canvas id="draw"></canvas>
+    <canvas id="hand"></canvas>
+  </div>
+
+  <div class="meter"><div id="fill"></div></div>
+  <p id="hint">Trace the letter with your finger</p>
+
+  <div class="actions">
+    <button class="feat" id="nameBtn" aria-label="Hear the letter name">
+      <span class="ficon" id="nameFace">A</span><span>Name</span>
+    </button>
+    <button class="feat ear" id="soundBtn" aria-label="Hear the sound this letter makes">
+      <span class="ficon">&#128066;</span><span>Sound</span>
+    </button>
+    <button class="big alt" id="showme">Show me</button>
+    <button class="big alt" id="again">Start over</button>
+  </div>
+</section>
+
+<!-- Draw -->
+<section id="paint" hidden>
+  <div class="bar">
+    <button class="pill" id="pHome">&larr; Back</button>
+    <span>
+      <button class="pill" id="clearBtn">Clear</button>
+      <button class="pill" id="saveBtn">Save</button>
+    </span>
+  </div>
+  <div id="paintStage"><canvas id="paintCanvas"></canvas></div>
+  <div class="palette" id="palette" aria-label="Colors"></div>
+  <div class="palette" id="sizes" aria-label="Brush size"></div>
+</section>
+
+<!-- Game: find the letter -->
+<section id="game" hidden>
+  <div class="bar">
+    <button class="pill" id="gHome">&larr; Home</button>
+    <span class="score">&#11088; <span id="score">0</span></span>
+  </div>
+  <button class="feat" id="listen" aria-label="Hear the letter again">
+    <span class="ficon">&#128266;</span><span>Listen</span>
+  </button>
+  <div id="choices"></div>
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  // ===== SETTINGS YOU CAN CHANGE =====
+  // Voice speed: 1 is normal. Lower is slower (try 0.7 to 0.9).
+  var SPEECH_SPEED = 0.8;
+  // Learn mode: how many times to tap a letter before the next one unlocks.
+  var TAPS_TO_LEARN = 5;
+  // The name the voice uses when praising. {name} in a phrase becomes this.
+  var KID_NAME = "Alex";
+  // ====================================
+
+  // How the voice says each letter's NAME and its SOUND.
+  // These are spelled the way the voice pronounces them, so you can tweak
+  // any one that doesn't sound right (for example "fff" to "ffff").
+  var NAMES = {
+    A:"ayy", B:"bee", C:"see", D:"dee", E:"ee", F:"eff", G:"jee", H:"aitch",
+    I:"eye", J:"jay", K:"kay", L:"ell", M:"em", N:"en", O:"oh", P:"pee",
+    Q:"cue", R:"are", S:"ess", T:"tee", U:"you", V:"vee", W:"double you",
+    X:"ex", Y:"why", Z:"Z."
+  };
+  var SOUNDS = {
+    A:"aeh", B:"buh", C:"kuh", D:"duh", E:"eh", F:"fff", G:"guh", H:"huh",
+    I:"ih", J:"juh", K:"kuh", L:"lll", M:"mmm", N:"nnn", O:"ah", P:"puh",
+    Q:"kwuh", R:"rrr", S:"sss", T:"tuh", U:"uh", V:"vvv", W:"wuh",
+    X:"ks", Y:"yuh", Z:"zzz"
+  };
+
+  // Phrases said after a good answer. One is picked at random each time.
+  var PRAISE = [
+    "Good job, {name}!", "Great job, {name}!", "Awesome, {name}!",
+    "You did it, {name}!", "Way to go, {name}!", "Super job, {name}!",
+    "Amazing, {name}!", "That's right, {name}!", "High five, {name}!",
+    "You're so smart, {name}!", "Fantastic!", "Excellent!", "Wow, nice work!",
+    "Yay, {name}!", "Keep it up, {name}!", "You got it!", "Perfect!",
+    "I'm proud of you, {name}!"
+  ];
+  // Phrases said after a wrong answer (always kind).
+  var TRY_AGAIN = [
+    "Nice try, {name}! Try again.", "Almost! Try again.",
+    "You can do it, {name}!", "Let's try again.", "Good try! Listen again.",
+    "Keep going, {name}!"
+  ];
+
+  var FONT = '"Arial Rounded MT Bold","Nunito","Trebuchet MS",system-ui,sans-serif';
+
+  var WORDS = [
+    ["A","Apple","\uD83C\uDF4E"], ["B","Bear","\uD83D\uDC3B"], ["C","Cat","\uD83D\uDC31"],
+    ["D","Dog","\uD83D\uDC36"], ["E","Elephant","\uD83D\uDC18"], ["F","Fish","\uD83D\uDC1F"],
+    ["G","Grapes","\uD83C\uDF47"], ["H","Hat","\uD83C\uDFA9"], ["I","Ice cream","\uD83C\uDF66"],
+    ["J","Juice","\uD83E\uDDC3"], ["K","Kite","\uD83E\uDE81"], ["L","Lion","\uD83E\uDD81"],
+    ["M","Moon","\uD83C\uDF19"], ["N","Nose","\uD83D\uDC43"], ["O","Octopus","\uD83D\uDC19"],
+    ["P","Pizza","\uD83C\uDF55"], ["Q","Queen","\uD83D\uDC51"], ["R","Rainbow","\uD83C\uDF08"],
+    ["S","Sun","\u2600\uFE0F"], ["T","Tree","\uD83C\uDF33"], ["U","Umbrella","\u2602\uFE0F"],
+    ["V","Violin","\uD83C\uDFBB"], ["W","Whale","\uD83D\uDC33"], ["X","X-ray","\uD83E\uDE7B"],
+    ["Y","Yarn","\uD83E\uDDF6"], ["Z","Zebra","\uD83E\uDD93"]
+  ];
+
+  // [main color, darker edge color]
+  var COLORS = [
+    ["#ef476f","#b32d4e"], ["#f5a300","#b87800"], ["#06a99a","#04776c"],
+    ["#7b5cff","#5238c7"], ["#2f9bff","#1b6fc2"], ["#5fb840","#43882b"]
+  ];
+
+  var ROAD_W = 15, MASK_W = 9, ALLOW_W = 24;   // guide, must-cover, and allowed widths (in a 100-unit box)
+  var S = 160;            // size of the hidden grid used to score tracing
+  var PEN = 0.1;         // pen width as a fraction of the drawing area
+  var NEED = 0.7;         // how much of the letter must be covered
+  var MAX_STRAY = 0.3;    // how much of the ink may land off the letter
+
+  var $ = function (id) { return document.getElementById(id); };
+  var view = $("view"), grid = $("grid");
+  var screens = { dash: $("dash"), letters: $("letters"), tgrid: $("tgrid"), view: view, paint: $("paint"), game: $("game") };
+
+  function show(name) {
+    for (var k in screens) screens[k].hidden = (k !== name);
+    window.scrollTo(0, 0);
+    stopDemo();
+    if ("speechSynthesis" in window) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+  }
+  var stage = $("stage"), guide = $("guide"), draw = $("draw");
+  var gctx = guide.getContext("2d"), dctx = draw.getContext("2d");
+  var hand = $("hand"), hctx = hand.getContext("2d");
+
+  var upper = true, current = 0, done = {};
+  try { done = JSON.parse(localStorage.getItem("letters-done") || "{}"); } catch (e) { done = {}; }
+  var mode = "free", progress = 0, taps = 0;
+  try {
+    mode = localStorage.getItem("letters-mode") === "learn" ? "learn" : "free";
+    progress = parseInt(localStorage.getItem("letters-progress") || "0", 10) || 0;
+    progress = Math.max(0, Math.min(26, progress));
+  } catch (e) {}
+  function saveLearn() {
+    try {
+      localStorage.setItem("letters-mode", mode);
+      localStorage.setItem("letters-progress", String(progress));
+    } catch (e) {}
+  }
+  function save() { try { localStorage.setItem("letters-done", JSON.stringify(done)); } catch (e) {} }
+
+  // ---------- Speech ----------
+  // The voice is fixed: Google US English. If a browser doesn't have it,
+  // fall back to another soft English voice, then the device default.
+  var FALLBACKS = [
+    "Aria", "Jenny", "Michelle", "Samantha", "Ava", "Allison", "Susan",
+    "Karen", "Tessa", "Moira", "Serena", "Fiona", "Victoria", "Zira", "Female"
+  ];
+  var voice = null;
+
+  function pickVoice() {
+    if (!("speechSynthesis" in window)) return;
+    var all = window.speechSynthesis.getVoices().filter(function (v) {
+      return /^en/i.test(v.lang);
+    });
+    var order = ["Google US English"].concat(FALLBACKS), i, j;
+    voice = null;
+    for (i = 0; !voice && i < order.length; i++) {
+      for (j = 0; j < all.length; j++) {
+        if (all[j].name.indexOf(order[i]) !== -1) { voice = all[j]; break; }
+      }
+    }
+  }
+  if ("speechSynthesis" in window) {
+    pickVoice();
+    // Many browsers load their voice list a moment after the page opens.
+    window.speechSynthesis.addEventListener("voiceschanged", pickVoice);
+  }
+
+  function say(text) {
+    if (!("speechSynthesis" in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = "en-US"; }
+      u.rate = SPEECH_SPEED;
+      u.pitch = 1.05;
+      u.volume = 0.9;
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  var lastPick = {};
+  function pick(list, key) {
+    var i;
+    do { i = Math.floor(Math.random() * list.length); }
+    while (list.length > 1 && i === lastPick[key]);
+    lastPick[key] = i;
+    return list[i].replace(/\{name\}/g, KID_NAME);
+  }
+  function praise() { return pick(PRAISE, "praise"); }
+  function retry() { return pick(TRY_AGAIN, "retry"); }
+
+  // ---------- Home grid ----------
+  function shown(ch) { return upper ? ch : ch.toLowerCase(); }
+
+  function buildGrid() {
+    grid.innerHTML = "";
+    var learn = mode === "learn";
+    WORDS.forEach(function (w, i) {
+      var b = document.createElement("button");
+      var isDone = learn && i < progress;
+      var locked = learn && i > progress;
+      var current = learn && i === progress;
+      b.className = "tile" + (isDone ? " done" : "") + (locked ? " locked" : "") + (current ? " current" : "");
+      b.textContent = shown(w[0]);
+      b.style.setProperty("--c", COLORS[i % COLORS.length][0]);
+      b.style.setProperty("--d", COLORS[i % COLORS.length][1]);
+      b.setAttribute("aria-label", "Letter " + w[0]);
+
+      if (current) {
+        var dots = document.createElement("span");
+        dots.className = "dots";
+        for (var j = 0; j < TAPS_TO_LEARN; j++) {
+          var d = document.createElement("i");
+          if (j < taps) d.className = "on";
+          dots.appendChild(d);
+        }
+        b.appendChild(dots);
+      }
+
+      b.addEventListener("animationend", function (e) {
+        if (e.animationName === "bounce" || e.animationName === "shake") b.classList.remove("bounce", "shake");
+      });
+
+      b.addEventListener("click", function () {
+        if (mode === "learn" && i > progress) {      // not unlocked yet
+          b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
+          return;
+        }
+        say(NAMES[w[0]]);
+        b.classList.remove("bounce"); void b.offsetWidth; b.classList.add("bounce");
+        if (mode === "learn" && i === progress) learnTap(i, b);
+      });
+      grid.appendChild(b);
+    });
+  }
+
+  function learnTap(i, b) {
+    taps++;
+    var d = b.querySelector(".dots");
+    if (d) for (var j = 0; j < d.children.length; j++) d.children[j].classList.toggle("on", j < taps);
+    if (taps >= TAPS_TO_LEARN) {
+      taps = 0; progress = i + 1; saveLearn();
+      setTimeout(function () {
+        confetti();
+        say(progress >= WORDS.length ? KID_NAME + ", you learned all the letters! Amazing!" : praise());
+        buildGrid(); scrollToCurrent();
+      }, 1200);
+    }
+  }
+
+  function scrollToCurrent() {
+    if (mode !== "learn" || progress >= WORDS.length) return;
+    var t = grid.children[progress];
+    if (!t || !t.scrollIntoView) return;
+    var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    t.scrollIntoView({ block: "center", behavior: calm ? "auto" : "smooth" });
+  }
+
+  function setMode(m) {
+    mode = m; taps = 0; saveLearn();
+    $("modeFree").classList.toggle("sel", mode === "free");
+    $("modeLearn").classList.toggle("sel", mode === "learn");
+    $("learnReset").hidden = mode !== "learn";
+    buildGrid(); scrollToCurrent();
+  }
+  $("modeFree").addEventListener("click", function () { setMode("free"); });
+  $("modeLearn").addEventListener("click", function () { setMode("learn"); });
+  $("learnReset").addEventListener("click", function () {
+    if (window.confirm("Start learning from A again?")) {
+      progress = 0; taps = 0; saveLearn(); buildGrid(); scrollToCurrent();
+    }
+  });
+
+  function toggleCase() {
+    upper = !upper;
+    $("caseBtn").textContent = upper ? "Aa" : "aA";
+    $("caseBtn2").textContent = upper ? "Aa" : "aA";
+    buildGrid(); buildTraceGrid();
+    if (!view.hidden) openLetter(current, false);
+  }
+  $("caseBtn").addEventListener("click", toggleCase);
+  $("caseBtn2").addEventListener("click", toggleCase);
+
+  // The letters Alex picks from on the Draw screen.
+  function buildTraceGrid() {
+    var box = $("tgridTiles");
+    box.innerHTML = "";
+    WORDS.forEach(function (w, i) {
+      var b = document.createElement("button");
+      b.className = "tile" + (done[w[0]] ? " done" : "");
+      b.textContent = shown(w[0]);
+      b.style.setProperty("--c", COLORS[i % COLORS.length][0]);
+      b.style.setProperty("--d", COLORS[i % COLORS.length][1]);
+      b.setAttribute("aria-label", "Trace the letter " + w[0]);
+      b.addEventListener("click", function () { openLetter(i, true); });
+      box.appendChild(b);
+    });
+  }
+
+  // ---------- Letter view ----------
+  var maskArr, allowArr, ink = "#ef476f", finished = false, drawing = false, last = null, moves = 0;
+
+  function openLetter(i, speak) {
+    current = (i + WORDS.length) % WORDS.length;
+    var w = WORDS[current];
+    var col = COLORS[current % COLORS.length];
+    ink = col[0];
+    view.style.setProperty("--c", col[0]);
+    view.style.setProperty("--d", col[1]);
+    show("view");
+
+    $("nameFace").textContent = shown(w[0]);
+    $("pic").textContent = w[2];
+    $("caption").innerHTML = "<b>" + shown(w[0]) + "</b> is for " + w[1];
+    if (speak) say(NAMES[w[0]]);
+    setupTrace(true);
+  }
+
+  // ---------- Stroke shapes ----------
+  // Every letter is a list of strokes, in the order you write them.
+  // Each stroke is a list of [x, y] points in a 100 x 100 box (y goes down).
+  function L(x1, y1, x2, y2) { return [[x1, y1], [x2, y2]]; }
+  function ARC(cx, cy, rx, ry, a0, a1) {
+    var pts = [], n = Math.max(8, Math.ceil(Math.abs(a1 - a0) / 8));
+    for (var i = 0; i <= n; i++) {
+      var a = (a0 + (a1 - a0) * i / n) * Math.PI / 180;
+      pts.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]);
+    }
+    return pts;
+  }
+  function J() {
+    var out = [];
+    for (var i = 0; i < arguments.length; i++) out = out.concat(arguments[i]);
+    return out;
+  }
+
+  var UP = {
+    A: [L(50,14,24,84), L(50,14,76,84), L(35,60,65,60)],
+    B: [L(28,14,28,84), J(L(28,14,50,14), ARC(50,31.5,22,17.5,-90,90), L(50,49,28,49)),
+        J(L(28,49,52,49), ARC(52,66.5,24,17.5,-90,90), L(52,84,28,84))],
+    C: [ARC(52,49,26,35,-45,-315)],
+    D: [L(26,14,26,84), J(L(26,14,46,14), ARC(46,49,30,35,-90,90), L(46,84,26,84))],
+    E: [L(30,14,30,84), L(30,14,72,14), L(30,49,66,49), L(30,84,72,84)],
+    F: [L(30,14,30,84), L(30,14,72,14), L(30,49,66,49)],
+    G: [ARC(52,49,28,35,-45,-350), L(55,55,80,55)],
+    H: [L(26,14,26,84), L(74,14,74,84), L(26,49,74,49)],
+    I: [L(50,14,50,84), L(36,14,64,14), L(36,84,64,84)],
+    J: [J(L(62,14,62,64), ARC(44,64,18,20,0,160))],
+    K: [L(28,14,28,84), L(72,14,30,54), L(46,38,74,84)],
+    L: [L(30,14,30,84), L(30,84,72,84)],
+    M: [L(24,84,24,14), L(24,14,50,64), L(50,64,76,14), L(76,14,76,84)],
+    N: [L(26,84,26,14), L(26,14,74,84), L(74,84,74,14)],
+    O: [ARC(50,49,28,35,-90,-450)],
+    P: [L(28,14,28,84), J(L(28,14,52,14), ARC(52,32,24,18,-90,90), L(52,50,28,50))],
+    Q: [ARC(50,49,28,35,-90,-450), L(56,64,78,86)],
+    R: [L(28,14,28,84), J(L(28,14,52,14), ARC(52,32,24,18,-90,90), L(52,50,28,50)), L(46,50,74,84)],
+    S: [J(ARC(50,31,24,17,-30,-270), ARC(50,66,26,18,-90,150))],
+    T: [L(24,14,76,14), L(50,14,50,84)],
+    U: [J(L(26,14,26,58), ARC(50,58,24,26,180,0), L(74,58,74,14))],
+    V: [L(24,14,50,84), L(50,84,76,14)],
+    W: [L(16,14,32,84), L(32,84,50,30), L(50,30,68,84), L(68,84,84,14)],
+    X: [L(26,14,74,84), L(74,14,26,84)],
+    Y: [L(24,14,50,50), L(76,14,50,50), L(50,50,50,84)],
+    Z: [L(26,14,74,14), L(74,14,26,84), L(26,84,74,84)]
+  };
+
+  var LOW = {
+    a: [ARC(46,59,20,19,-40,-400), L(66,40,66,78)],
+    b: [L(30,12,30,78), ARC(50,59,20,19,-170,190)],
+    c: [ARC(52,59,20,19,-45,-315)],
+    d: [ARC(46,59,20,19,-40,-400), L(66,12,66,78)],
+    e: [J(L(32,59,72,59), ARC(52,59,20,19,0,-320))],
+    f: [J(ARC(58,28,16,16,-20,-180), L(42,28,42,78)), L(30,44,56,44)],
+    g: [ARC(46,59,20,19,-40,-400), J(L(66,40,66,86), ARC(46,86,20,12,0,150))],
+    h: [L(30,12,30,78), J(ARC(50,58,20,18,180,360), L(70,58,70,78))],
+    i: [L(50,40,50,78), L(50,22,50,23)],
+    j: [J(L(54,40,54,86), ARC(38,86,16,12,0,140)), L(54,22,54,23)],
+    k: [L(30,12,30,78), L(68,42,30,64), L(44,56,70,78)],
+    l: [L(50,12,50,78)],
+    m: [L(24,40,24,78), J(ARC(37,56,13,16,180,360), L(50,56,50,78)), J(ARC(63,56,13,16,180,360), L(76,56,76,78))],
+    n: [L(30,40,30,78), J(ARC(50,58,20,18,180,360), L(70,58,70,78))],
+    o: [ARC(50,59,22,19,-90,-450)],
+    p: [L(30,40,30,98), ARC(50,59,20,19,-170,190)],
+    q: [ARC(46,59,20,19,-40,-400), L(66,40,66,98)],
+    r: [L(34,40,34,78), ARC(52,58,18,18,180,290)],
+    s: [J(ARC(50,49,17,9,-30,-270), ARC(50,68,19,10,-90,150))],
+    t: [L(46,18,46,78), L(32,42,62,42)],
+    u: [J(L(30,40,30,60), ARC(50,60,20,18,180,0)), L(70,40,70,78)],
+    v: [L(28,40,50,78), L(50,78,72,40)],
+    w: [L(20,40,34,78), L(34,78,50,48), L(50,48,66,78), L(66,78,80,40)],
+    x: [L(30,40,70,78), L(70,40,30,78)],
+    y: [L(28,40,50,78), L(72,40,38,98)],
+    z: [L(30,40,70,40), L(70,40,30,78), L(30,78,70,78)]
+  };
+
+  function strokesFor() {
+    var ch = shown(WORDS[current][0]);
+    return (upper ? UP : LOW)[ch];
+  }
+
+  // ---------- Drawing helpers ----------
+  function dist(a, b) { return Math.hypot(b[0] - a[0], b[1] - a[1]); }
+  function plen(pts) {
+    var d = 0;
+    for (var i = 1; i < pts.length; i++) d += dist(pts[i - 1], pts[i]);
+    return d;
+  }
+  // The point (and direction) a given distance along a stroke.
+  function along(pts, d) {
+    for (var i = 1; i < pts.length; i++) {
+      var seg = dist(pts[i - 1], pts[i]);
+      if (d <= seg || i === pts.length - 1) {
+        var t = seg ? Math.min(1, d / seg) : 0;
+        return {
+          x: pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t,
+          y: pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t,
+          a: Math.atan2(pts[i][1] - pts[i - 1][1], pts[i][0] - pts[i - 1][0])
+        };
+      }
+      d -= seg;
+    }
+    return { x: pts[0][0], y: pts[0][1], a: 0 };
+  }
+  function tracePath(ctx, pts) {
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+  }
+  function arrow(ctx, x, y, a, size) {
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(a);
+    ctx.beginPath();
+    ctx.moveTo(size, 0); ctx.lineTo(-size * 0.7, size * 0.85); ctx.lineTo(-size * 0.7, -size * 0.85);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  // The guide: a pale road, a light gray dashed line down the middle,
+  // arrows showing the direction, and a green dot with a number where each stroke starts.
+  function drawGuide(strokes) {
+    var g = gctx;
+    g.clearRect(-2, -2, 104, 104);
+    g.lineCap = "round"; g.lineJoin = "round";
+
+    g.strokeStyle = "#e6ecf8"; g.lineWidth = ROAD_W;
+    strokes.forEach(function (s) { tracePath(g, s); g.stroke(); });
+
+    g.strokeStyle = "#a9b3cf"; g.lineWidth = 1.4; g.setLineDash([2.6, 3.4]);
+    strokes.forEach(function (s) { if (plen(s) > 4) { tracePath(g, s); g.stroke(); } });
+    g.setLineDash([]);
+
+    g.fillStyle = "#6676a3";
+    strokes.forEach(function (s) {
+      var len = plen(s);
+      if (len < 20) return;
+      var n = Math.max(1, Math.round(len / 38));
+      for (var i = 0; i < n; i++) {
+        var p = along(s, len * (i + 0.5) / n);
+        arrow(g, p.x, p.y, p.a, 4.6);
+      }
+    });
+
+    var placed = [];
+    strokes.forEach(function (s, i) {
+      var pt = { x: s[0][0], y: s[0][1] };
+      var crowded = placed.some(function (q) { return Math.hypot(q.x - pt.x, q.y - pt.y) < 11; });
+      if (crowded && plen(s) > 20) pt = along(s, 13);
+      placed.push(pt);
+      g.fillStyle = "#2fb872";
+      g.beginPath(); g.arc(pt.x, pt.y, 6.2, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#fff"; g.font = "700 8px " + FONT;
+      g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillText(String(i + 1), pt.x, pt.y + 0.5);
+    });
+  }
+
+  // Hidden grids used to score the tracing.
+  function alphaGrid(strokes, lw) {
+    var c = document.createElement("canvas"); c.width = c.height = S;
+    var x = c.getContext("2d");
+    x.scale(S / 100, S / 100);
+    x.lineCap = "round"; x.lineJoin = "round";
+    x.strokeStyle = "#000"; x.lineWidth = lw;
+    strokes.forEach(function (st) { tracePath(x, st); x.stroke(); });
+    var d = x.getImageData(0, 0, S, S).data, out = new Uint8Array(S * S);
+    for (var i = 0; i < S * S; i++) out[i] = d[i * 4 + 3] > 80 ? 1 : 0;
+    return out;
+  }
+
+  // A moving dot that shows how to write the letter.
+  var animId = 0;
+  function stopDemo() {
+    cancelAnimationFrame(animId);
+    hctx.clearRect(-2, -2, 104, 104);
+  }
+  function playDemo() {
+    stopDemo();
+    if (view.hidden) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var strokes = strokesFor(), SPEED = 95, GAP = 0.35, t0 = null, total = 0;
+    var lens = strokes.map(plen);
+    var starts = lens.map(function (ln) { var s0 = total; total += Math.max(ln, 6) / SPEED + GAP; return s0; });
+    function frame(ts) {
+      if (t0 === null) t0 = ts;
+      var t = (ts - t0) / 1000;
+      hctx.clearRect(-2, -2, 104, 104);
+      if (t >= total) return;
+      var i = lens.length - 1;
+      while (i > 0 && t < starts[i]) i--;
+      var p = along(strokes[i], Math.min(lens[i], (t - starts[i]) * SPEED));
+      hctx.fillStyle = "#fff"; hctx.beginPath(); hctx.arc(p.x, p.y, 7.5, 0, Math.PI * 2); hctx.fill();
+      hctx.fillStyle = ink; hctx.beginPath(); hctx.arc(p.x, p.y, 5.5, 0, Math.PI * 2); hctx.fill();
+      animId = requestAnimationFrame(frame);
+    }
+    animId = requestAnimationFrame(frame);
+  }
+
+  function setupTrace(demo) {
+    stopDemo();
+    var size = Math.floor(stage.clientWidth), dpr = window.devicePixelRatio || 1;
+    [guide, draw, hand].forEach(function (c) {
+      c.width = size * dpr; c.height = size * dpr;
+      c.style.width = size + "px"; c.style.height = size + "px";
+    });
+    var k = dpr * size / 100;
+    gctx.setTransform(k, 0, 0, k, 0, 0);
+    hctx.setTransform(k, 0, 0, k, 0, 0);
+    dctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    dctx.lineCap = "round"; dctx.lineJoin = "round";
+    dctx.lineWidth = size * PEN; dctx.strokeStyle = ink; dctx.fillStyle = ink;
+
+    var strokes = strokesFor();
+    drawGuide(strokes);
+    maskArr = alphaGrid(strokes, MASK_W);
+    allowArr = alphaGrid(strokes, ALLOW_W);
+    finished = false;
+    $("fill").style.width = "0%";
+    $("hint").textContent = "Follow the arrows";
+    if (demo) setTimeout(playDemo, 350);
+  }
+
+  function pos(e) {
+    var r = draw.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  draw.addEventListener("pointerdown", function (e) {
+    e.preventDefault();
+    stopDemo();
+    drawing = true; moves = 0;
+    try { draw.setPointerCapture(e.pointerId); } catch (err) {}
+    last = pos(e);
+    dctx.beginPath(); dctx.arc(last.x, last.y, dctx.lineWidth / 2, 0, Math.PI * 2); dctx.fill();
+  });
+
+  draw.addEventListener("pointermove", function (e) {
+    if (!drawing) return;
+    e.preventDefault();
+    var p = pos(e);
+    dctx.beginPath(); dctx.moveTo(last.x, last.y); dctx.lineTo(p.x, p.y); dctx.stroke();
+    last = p;
+    if (++moves % 12 === 0) check();
+  });
+
+  function stop() { if (drawing) { drawing = false; check(); } }
+  draw.addEventListener("pointerup", stop);
+  draw.addEventListener("pointercancel", stop);
+
+  var probe = document.createElement("canvas"); probe.width = probe.height = S;
+  var pctx = probe.getContext("2d");
+
+  function check() {
+    if (finished) return;
+    pctx.clearRect(0, 0, S, S);
+    pctx.drawImage(draw, 0, 0, S, S);
+    var d = pctx.getImageData(0, 0, S, S).data;
+    var hit = 0, total = 0, inked = 0, stray = 0;
+    for (var i = 0; i < S * S; i++) {
+      var on = d[i * 4 + 3] > 40;
+      if (maskArr[i]) { total++; if (on) hit++; }
+      if (on) { inked++; if (!allowArr[i]) stray++; }
+    }
+    var cov = total ? hit / total : 0;
+    var off = inked ? stray / inked : 0;
+    $("fill").style.width = Math.min(100, Math.round(cov / NEED * 100)) + "%";
+
+    if (cov >= NEED && off <= MAX_STRAY) {
+      finished = true;
+      celebrate();
+    } else if (cov >= NEED) {
+      $("hint").textContent = "Almost! Stay on the letter";
+    } else {
+      $("hint").textContent = "Keep going!";
+    }
+  }
+
+  function celebrate() {
+    var key = WORDS[current][0];
+    done[key] = true; save(); buildTraceGrid();
+    $("hint").textContent = "Great job!";
+    say(praise());
+    confetti();
+  }
+
+  function confetti() {
+    var bits = ["\u2B50", "\uD83C\uDF89", "\u2728", "\uD83C\uDF88", "\uD83C\uDF1F"];
+    for (var i = 0; i < 26; i++) {
+      var s = document.createElement("span");
+      s.className = "pop";
+      s.textContent = bits[i % bits.length];
+      s.style.left = Math.random() * 96 + "vw";
+      s.style.animationDelay = Math.random() * 0.6 + "s";
+      document.body.appendChild(s);
+      setTimeout(function (el) { el.remove(); }, 2800, s);
+    }
+  }
+
+  // ---------- Buttons ----------
+  $("back").addEventListener("click", function () { show("tgrid"); });
+  $("prev").addEventListener("click", function () { openLetter(current - 1, true); });
+  $("next").addEventListener("click", function () { openLetter(current + 1, true); });
+  $("again").addEventListener("click", function () { setupTrace(true); });
+  $("showme").addEventListener("click", playDemo);
+  $("nameBtn").addEventListener("click", function () { say(NAMES[WORDS[current][0]]); });
+  $("soundBtn").addEventListener("click", function () { say(SOUNDS[WORDS[current][0]]); });
+  $("pic").addEventListener("click", function () {
+    var w = WORDS[current]; say(w[0] + " is for " + w[1]);
+  });
+
+  // ---------- Dashboard navigation ----------
+  $("goLetters").addEventListener("click", function () { show("letters"); scrollToCurrent(); });
+  $("goPaint").addEventListener("click", function () { show("tgrid"); });
+  $("freeDraw").addEventListener("click", function () { show("paint"); setupPaint(); });
+  $("tHome").addEventListener("click", function () { show("dash"); });
+  $("goGame").addEventListener("click", function () { show("game"); startGame(); });
+  $("lHome").addEventListener("click", function () { show("dash"); });
+  $("pHome").addEventListener("click", function () { show("tgrid"); });
+  $("gHome").addEventListener("click", function () { show("dash"); });
+
+  // ---------- Draw ----------
+  var PAPER = "#fffdf7";
+  var PAINT_COLORS = ["#ef476f", "#f5a300", "#ffd23f", "#5fb840", "#06a99a", "#2f9bff", "#7b5cff", "#8a5a3c", "#1d2b53"];
+  var BRUSHES = [0.012, 0.03, 0.06];      // pen width as a fraction of the page
+  var pc = $("paintCanvas"), pg = pc.getContext("2d");
+  var brush = { color: PAINT_COLORS[0], size: 1, erase: false };
+  var paintW = 0, painting = false, plast = null;
+
+  function setupPaint() {
+    var size = Math.floor($("paintStage").clientWidth), dpr = window.devicePixelRatio || 1;
+    if (!size) return;
+    var w = Math.round(size * dpr);
+    if (w === paintW) return;           // already the right size, keep the drawing
+    var keep = null;
+    if (paintW) {
+      keep = document.createElement("canvas");
+      keep.width = pc.width; keep.height = pc.height;
+      keep.getContext("2d").drawImage(pc, 0, 0);
+    }
+    paintW = w;
+    pc.width = w; pc.height = w;
+    pc.style.width = size + "px"; pc.style.height = size + "px";
+    pg.setTransform(dpr, 0, 0, dpr, 0, 0);
+    pg.fillStyle = PAPER; pg.fillRect(0, 0, size, size);
+    if (keep) pg.drawImage(keep, 0, 0, size, size);
+    pg.lineCap = "round"; pg.lineJoin = "round";
+  }
+
+  function buildTools() {
+    var pal = $("palette"), sz = $("sizes");
+    PAINT_COLORS.forEach(function (c, i) {
+      var b = document.createElement("button");
+      b.className = "sw" + (i === 0 ? " sel" : "");
+      b.style.setProperty("--sw", c);
+      b.setAttribute("aria-label", "Color " + (i + 1));
+      b.addEventListener("click", function () {
+        brush.color = c; brush.erase = false; mark();
+      });
+      pal.appendChild(b);
+    });
+    BRUSHES.forEach(function (f, i) {
+      var b = document.createElement("button");
+      b.className = "sz" + (i === 1 ? " sel" : "");
+      var dot = document.createElement("i");
+      var d = 8 + i * 9; dot.style.width = dot.style.height = d + "px";
+      b.appendChild(dot);
+      b.setAttribute("aria-label", ["Thin", "Medium", "Thick"][i] + " brush");
+      b.addEventListener("click", function () { brush.size = i; mark(); });
+      sz.appendChild(b);
+    });
+    var er = document.createElement("button");
+    er.className = "pill"; er.textContent = "Erase"; er.id = "eraseBtn";
+    er.addEventListener("click", function () { brush.erase = true; mark(); });
+    sz.appendChild(er);
+  }
+
+  function mark() {
+    var sws = $("palette").children, szs = $("sizes").children, i;
+    for (i = 0; i < sws.length; i++) {
+      sws[i].classList.toggle("sel", !brush.erase && PAINT_COLORS[i] === brush.color);
+    }
+    for (i = 0; i < BRUSHES.length; i++) szs[i].classList.toggle("sel", brush.size === i);
+    $("eraseBtn").classList.toggle("sel", brush.erase);
+  }
+
+  function pen() {
+    var w = pc.clientWidth * BRUSHES[brush.size] * (brush.erase ? 2 : 1);
+    pg.lineWidth = w;
+    pg.strokeStyle = pg.fillStyle = brush.erase ? PAPER : brush.color;
+    return w;
+  }
+  function ppos(e) {
+    var r = pc.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  pc.addEventListener("pointerdown", function (e) {
+    e.preventDefault();
+    painting = true;
+    try { pc.setPointerCapture(e.pointerId); } catch (err) {}
+    plast = ppos(e);
+    var w = pen();
+    pg.beginPath(); pg.arc(plast.x, plast.y, w / 2, 0, Math.PI * 2); pg.fill();
+  });
+  pc.addEventListener("pointermove", function (e) {
+    if (!painting) return;
+    e.preventDefault();
+    var p = ppos(e);
+    pen();
+    pg.beginPath(); pg.moveTo(plast.x, plast.y); pg.lineTo(p.x, p.y); pg.stroke();
+    plast = p;
+  });
+  function pend() { painting = false; }
+  pc.addEventListener("pointerup", pend);
+  pc.addEventListener("pointercancel", pend);
+
+  $("clearBtn").addEventListener("click", function () {
+    var size = pc.clientWidth;
+    pg.fillStyle = PAPER; pg.fillRect(0, 0, size, size);
+  });
+  $("saveBtn").addEventListener("click", function () {
+    pc.toBlob(function (blob) {
+      if (!blob) return;
+      var url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = "my-drawing.png";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }, "image/png");
+  });
+  buildTools();
+
+  // ---------- Game: find the letter ----------
+  var stars = 0, target = null, locked = false, gameTimer;
+
+  function randLetter() { return WORDS[Math.floor(Math.random() * WORDS.length)][0]; }
+
+  function startGame() {
+    stars = 0; $("score").textContent = "0";
+    target = null;
+    nextRound();
+  }
+
+  function askAgain() { if (target) say("Find the letter " + NAMES[target]); }
+
+  function nextRound() {
+    locked = false;
+    var prev = target, t = randLetter();
+    while (t === prev) t = randLetter();
+    target = t;
+    var opts = [t];
+    while (opts.length < 3) {
+      var c = randLetter();
+      if (opts.indexOf(c) < 0) opts.push(c);
+    }
+    opts.sort(function () { return Math.random() - 0.5; });
+
+    var box = $("choices");
+    box.innerHTML = "";
+    opts.forEach(function (ch) {
+      var idx = ch.charCodeAt(0) - 65;
+      var b = document.createElement("button");
+      b.className = "tile";
+      b.textContent = shown(ch);
+      b.style.setProperty("--c", COLORS[idx % COLORS.length][0]);
+      b.style.setProperty("--d", COLORS[idx % COLORS.length][1]);
+      b.setAttribute("aria-label", "Letter " + ch);
+      b.addEventListener("click", function () { choose(ch, b); });
+      box.appendChild(b);
+    });
+    clearTimeout(gameTimer);
+    gameTimer = setTimeout(askAgain, 400);
+  }
+
+  function choose(ch, btn) {
+    if (locked) return;
+    if (ch === target) {
+      locked = true;
+      stars++; $("score").textContent = String(stars);
+      confetti();
+      say(praise());
+      clearTimeout(gameTimer);
+      gameTimer = setTimeout(nextRound, 1800);
+    } else {
+      btn.classList.remove("shake");
+      void btn.offsetWidth;            // restart the shake
+      btn.classList.add("shake");
+      say(retry());
+      clearTimeout(gameTimer);
+      gameTimer = setTimeout(askAgain, 1300);
+    }
+  }
+  $("listen").addEventListener("click", askAgain);
+
+  var timer;
+  window.addEventListener("resize", function () {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      if (!view.hidden) setupTrace();
+      if (!screens.paint.hidden) setupPaint();
+    }, 200);
+  });
+
+  $("modeFree").classList.toggle("sel", mode === "free");
+  $("modeLearn").classList.toggle("sel", mode === "learn");
+  $("learnReset").hidden = mode !== "learn";
+  buildGrid();
+  buildTraceGrid();
+})();
+</script>
+</body>
+</html>
