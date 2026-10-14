@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f6feb">
+<title>Job Tracker</title>
+<style>
+  :root {
+    --bg:#f4f5f7; --card:#fff; --ink:#1b1f24; --muted:#6b7280; --line:#e3e6ea;
+    --brand:#1f6feb; --good:#15803d; --warn:#b45309; --bad:#b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#111418; --card:#1b2027; --ink:#eef0f3; --muted:#9aa3af; --line:#2c333c; --brand:#5b9bff; --good:#4ade80; --warn:#fbbf24; --bad:#f87171; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding-bottom:84px; }
+  header { padding:14px 16px 6px; display:flex; justify-content:space-between; align-items:center; }
+  h1 { font-size:22px; margin:0; }
+  main { padding:8px 16px; max-width:720px; margin:0 auto; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:12px; }
+  .job { cursor:pointer; }
+  .row { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .muted { color:var(--muted); font-size:14px; }
+  .big { font-size:26px; font-weight:700; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; }
+  .stat .big.owed { color:var(--warn); } .stat .big.paid { color:var(--good); }
+  .pill { font-size:12px; font-weight:600; padding:2px 8px; border-radius:99px; background:var(--line); white-space:nowrap; }
+  .pill.paid { background:#dcfce7; color:#166534; } .pill.part { background:#fef3c7; color:#92400e; } .pill.unpaid { background:#fee2e2; color:#991b1b; }
+  button { font:inherit; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:10px; padding:10px 14px; cursor:pointer; }
+  button.primary { background:var(--brand); border-color:var(--brand); color:#fff; font-weight:600; }
+  button.danger { color:var(--bad); }
+  button.small { padding:6px 10px; font-size:14px; }
+  label { display:block; font-size:14px; color:var(--muted); margin:10px 0 4px; }
+  input, select, textarea { width:100%; font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px; }
+  textarea { min-height:110px; resize:vertical; }
+  nav { position:fixed; bottom:0; left:0; right:0; display:flex; background:var(--card); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); }
+  nav button { flex:1; border:0; border-radius:0; padding:14px 4px; background:none; color:var(--muted); font-weight:600; }
+  nav button.on { color:var(--brand); }
+  .fab { position:fixed; right:16px; bottom:76px; width:56px; height:56px; border-radius:50%; font-size:30px; line-height:1; padding:0; box-shadow:0 4px 14px rgba(0,0,0,.3); }
+  .photos { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
+  .photos .ph { position:relative; aspect-ratio:1; }
+  .photos img { width:100%; height:100%; object-fit:cover; border-radius:8px; cursor:pointer; }
+  .photos .x { position:absolute; top:3px; right:3px; background:rgba(0,0,0,.6); color:#fff; border:0; border-radius:50%; width:24px; height:24px; padding:0; font-size:14px; }
+  .photos .cloud { position:absolute; bottom:3px; left:3px; background:rgba(0,0,0,.6); color:#fff; border-radius:6px; font-size:11px; padding:1px 5px; }
+  .pay { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--line); }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.85); display:flex; align-items:center; justify-content:center; z-index:50; }
+  .modal img { max-width:96vw; max-height:92vh; }
+  .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:96px; background:#222; color:#fff; padding:10px 16px; border-radius:10px; z-index:60; max-width:90vw; }
+  .empty { text-align:center; color:var(--muted); padding:40px 10px; }
+  h2 { font-size:17px; margin:16px 0 8px; }
+  details summary { cursor:pointer; font-weight:600; }
+</style>
+</head>
+<body>
+<header><h1 id="title">Jobs</h1><span class="muted" id="sub"></span></header>
+<main id="app"></main>
+<nav>
+  <button data-tab="jobs">🏠 Jobs</button>
+  <button data-tab="pay">💵 Pay</button>
+  <button data-tab="summary">📊 Summary</button>
+  <button data-tab="settings">⚙️ Settings</button>
+</nav>
+
+<script>
+"use strict";
+/* ---------- tiny helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const money = n => (Number(n)||0).toLocaleString(undefined, {style:"currency", currency:"USD"});
+const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+const fmtDate = s => s ? new Date(s + "T12:00:00").toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"}) : "";
+function toast(msg, ms=2600) { const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.append(t); setTimeout(() => t.remove(), ms); }
+
+/* ---------- storage: jobs in localStorage, photos in IndexedDB ---------- */
+const LS = "painterJobs.v1";
+let state = { jobs: [], settings: { clientId: "", rootFolderId: "" } };
+function load() { try { const s = JSON.parse(localStorage.getItem(LS)); if (s) state = { ...state, ...s, settings: { ...state.settings, ...s.settings } }; } catch {} }
+function save() { try { localStorage.setItem(LS, JSON.stringify(state)); } catch { toast("Could not save — storage is full or blocked"); } }
+
+const idb = new Promise((res, rej) => {
+  const r = indexedDB.open("painterJobsPhotos", 1);
+  r.onupgradeneeded = () => r.result.createObjectStore("photos", { keyPath: "id" });
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+});
+async function tx(mode, fn) {
+  const db = await idb;
+  return new Promise((res, rej) => { const t = db.transaction("photos", mode); const out = fn(t.objectStore("photos")); t.oncomplete = () => res(out.result); t.onerror = () => rej(t.error); });
+}
+const photoPut = p => tx("readwrite", s => s.put(p));
+const photoGet = id => tx("readonly", s => s.get(id));
+const photoDel = id => tx("readwrite", s => s.delete(id));
+
+function resizeImage(file, max=1600) {
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => b ? res(b) : rej(new Error("resize failed")), "image/jpeg", 0.82);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("not an image")); };
+    img.src = url;
+  });
+}
+
+/* ---------- money math ---------- */
+const paidOf = j => (j.payments || []).reduce((a, p) => a + (Number(p.amount) || 0), 0);
+const owedOf = j => Math.max(0, (Number(j.pay) || 0) - paidOf(j));
+const payStatus = j => { const p = paidOf(j), t = Number(j.pay) || 0; return t > 0 && p >= t ? "paid" : p > 0 ? "part" : "unpaid"; };
+const statusLabel = { paid:"Paid", part:"Partly paid", unpaid:"Unpaid" };
+
+/* ---------- views ---------- */
+let tab = "jobs", openJobId = null, editing = false, filter = "all";
+function render() {
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+  const app = $("#app");
+  if (tab === "jobs") openJobId ? (editing ? viewEdit(app) : viewJob(app)) : viewJobs(app);
+  else if (tab === "pay") viewPay(app);
+  else if (tab === "summary") viewSummary(app);
+  else viewSettings(app);
+  $("#title").textContent = { jobs: openJobId ? (editing ? "Job" : "Job details") : "Jobs", pay: "Pay", summary: "Summary", settings: "Settings" }[tab];
+  window.scrollTo(0, 0);
+}
+
+function viewJobs(app) {
+  const owed = state.jobs.reduce((a, j) => a + owedOf(j), 0);
+  $("#sub").textContent = owed > 0 ? `Owed: ${money(owed)}` : "";
+  const list = state.jobs.filter(j => filter === "all" || (filter === "unpaid" ? payStatus(j) !== "paid" : payStatus(j) === "paid"))
+    .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  app.innerHTML = `
+    <div class="actions" style="margin:0 0 12px">
+      ${["all","unpaid","paid"].map(f => `<button class="small ${filter === f ? "primary" : ""}" data-f="${f}">${f[0].toUpperCase() + f.slice(1)}</button>`).join("")}
+    </div>
+    ${list.length ? list.map(j => `
+      <div class="card job" data-id="${j.id}">
+        <div class="row"><strong>${esc(j.title || "Untitled job")}</strong><span class="pill ${payStatus(j)}">${statusLabel[payStatus(j)]}</span></div>
+        <div class="muted">${esc(j.address || "No address")} · ${fmtDate(j.date)}</div>
+        <div class="row" style="margin-top:6px"><span>${money(j.pay)}</span><span class="muted">${(j.photos || []).length} 📷${owedOf(j) > 0 ? ` · owed ${money(owedOf(j))}` : ""}</span></div>
+      </div>`).join("") : `<div class="empty">${state.jobs.length ? "No jobs match this filter." : "No jobs yet.<br>Tap + to add your first one."}</div>`}
+    <button class="primary fab" id="add" aria-label="Add job">+</button>`;
+  app.querySelectorAll("[data-f]").forEach(b => b.onclick = () => { filter = b.dataset.f; render(); });
+  app.querySelectorAll(".job").forEach(c => c.onclick = () => { openJobId = c.dataset.id; render(); });
+  $("#add").onclick = () => { const j = { id: uid(), title: "", client: "", address: "", date: today(), status: "scheduled", pay: "", hours: "", notes: "", photos: [], payments: [] }; state.jobs.push(j); openJobId = j.id; editing = true; render(); };
+}
+
+function viewEdit(app) {
+  const j = state.jobs.find(x => x.id === openJobId);
+  $("#sub").textContent = "";
+  app.innerHTML = `
+    <div class="card">
+      <label>Job name / description</label><input id="f-title" value="${esc(j.title)}" placeholder="e.g. Smith living room repaint">
+      <label>Customer</label><input id="f-client" value="${esc(j.client)}">
+      <label>Location / address</label><input id="f-address" value="${esc(j.address)}">
+      <label>Date</label><input id="f-date" type="date" value="${esc(j.date)}">
+      <label>Status</label>
+      <select id="f-status">${["scheduled","in progress","done"].map(s => `<option ${j.status === s ? "selected" : ""}>${s}</option>`).join("")}</select>
+      <label>What I'm getting paid for this job ($)</label><input id="f-pay" type="number" inputmode="decimal" min="0" step="0.01" value="${esc(j.pay)}">
+      <label>Hours worked (optional)</label><input id="f-hours" type="number" inputmode="decimal" min="0" step="0.25" value="${esc(j.hours)}">
+      <label>What I did / notes</label><textarea id="f-notes" placeholder="Prep, coats, colors, products used, problems...">${esc(j.notes)}</textarea>
+      <div class="actions"><button class="primary" id="save">Save</button><button id="cancel">Cancel</button></div>
+    </div>`;
+  $("#save").onclick = () => {
+    Object.assign(j, { title: $("#f-title").value.trim(), client: $("#f-client").value.trim(), address: $("#f-address").value.trim(), date: $("#f-date").value,
+      status: $("#f-status").value, pay: $("#f-pay").value, hours: $("#f-hours").value, notes: $("#f-notes").value });
+    save(); editing = false; render();
+  };
+  $("#cancel").onclick = () => {
+    if (!j.title && !j.address && !j.notes && !j.pay && !(j.photos || []).length) state.jobs = state.jobs.filter(x => x !== j);
+    editing = false; if (!state.jobs.includes(j)) openJobId = null; render();
+  };
+}
+
+function viewJob(app) {
+  const j = state.jobs.find(x => x.id === openJobId);
+  if (!j) { openJobId = null; return render(); }
+  const maps = j.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(j.address)}` : "";
+  $("#sub").textContent = "";
+  app.innerHTML = `
+    <button class="small" id="back">← All jobs</button>
+    <div class="card" style="margin-top:10px">
+      <div class="row"><strong style="font-size:19px">${esc(j.title || "Untitled job")}</strong><span class="pill ${payStatus(j)}">${statusLabel[payStatus(j)]}</span></div>
+      ${j.client ? `<div>👤 ${esc(j.client)}</div>` : ""}
+      ${j.address ? `<div>📍 ${esc(j.address)} · <a href="${maps}" target="_blank" rel="noopener">Map</a></div>` : ""}
+      <div class="muted">${fmtDate(j.date)} · ${esc(j.status)}${j.hours ? ` · ${esc(j.hours)} hrs` : ""}</div>
+      ${j.notes ? `<h2>What I did</h2><div style="white-space:pre-wrap">${esc(j.notes)}</div>` : ""}
+      <div class="actions"><button class="small" id="edit">✏️ Edit</button><button class="small danger" id="del">Delete job</button></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">Pay</h2>
+      <div class="grid">
+        <div><div class="muted">Job pay</div><div class="big">${money(j.pay)}</div></div>
+        <div><div class="muted">Still owed</div><div class="big" style="color:${owedOf(j) > 0 ? "var(--warn)" : "var(--good)"}">${money(owedOf(j))}</div></div>
+      </div>
+      ${(j.payments || []).map(p => `<div class="pay"><span>${fmtDate(p.date)}${p.note ? ` · <span class="muted">${esc(p.note)}</span>` : ""}</span><span><strong>${money(p.amount)}</strong> <button class="small danger" data-delpay="${p.id}">✕</button></span></div>`).join("")}
+      <details style="margin-top:10px"><summary>Record a payment I received</summary>
+        <label>Amount ($)</label><input id="p-amt" type="number" inputmode="decimal" min="0" step="0.01" value="${owedOf(j) || ""}">
+        <label>Date paid</label><input id="p-date" type="date" value="${today()}">
+        <label>Note (cash, check #, Venmo…)</label><input id="p-note">
+        <div class="actions"><button class="primary small" id="p-add">Add payment</button></div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">Photos</h2>
+      <div class="actions">
+        <label class="small" style="display:inline-block;margin:0"><span class="primary" style="display:inline-block;border-radius:10px;padding:6px 10px;font-size:14px;font-weight:600;background:var(--brand);color:#fff;cursor:pointer">📷 Add photos</span>
+          <input id="ph-in" type="file" accept="image/*" multiple style="display:none"></label>
+        ${(j.photos || []).length ? `<button class="small" id="drive">☁️ Save to Google Drive</button>` : ""}
+      </div>
+      <div class="photos" id="photos"></div>
+    </div>`;
+  $("#back").onclick = () => { openJobId = null; render(); };
+  $("#edit").onclick = () => { editing = true; render(); };
+  $("#del").onclick = async () => {
+    if (!confirm("Delete this job, its payments and its photos from this device?")) return;
+    for (const p of j.photos || []) await photoDel(p.id);
+    state.jobs = state.jobs.filter(x => x !== j); save(); openJobId = null; render();
+  };
+  app.querySelectorAll("[data-delpay]").forEach(b => b.onclick = () => { j.payments = j.payments.filter(p => p.id !== b.dataset.delpay); save(); render(); });
+  $("#p-add").onclick = () => {
+    const amount = parseFloat($("#p-amt").value);
+    if (!(amount > 0)) return toast("Enter an amount");
+    (j.payments = j.payments || []).push({ id: uid(), amount, date: $("#p-date").value || today(), note: $("#p-note").value.trim() });
+    save(); render();
+  };
+  $("#ph-in").onchange = async e => {
+    let n = 0;
+    for (const f of e.target.files) {
+      try { const blob = await resizeImage(f); const id = uid(); await photoPut({ id, jobId: j.id, blob }); (j.photos = j.photos || []).push({ id, added: today(), driveUrl: "" }); n++; }
+      catch { toast("Skipped a file that isn't a photo"); }
+    }
+    save(); if (n) toast(`${n} photo${n > 1 ? "s" : ""} added`); render();
+  };
+  if ($("#drive")) $("#drive").onclick = () => uploadJobToDrive(j);
+  drawPhotos(j);
+}
+
+const urlCache = {};
+async function drawPhotos(j) {
+  const box = $("#photos"); if (!box) return;
+  for (const p of j.photos || []) {
+    const rec = await photoGet(p.id); if (!rec) continue;
+    const url = urlCache[p.id] || (urlCache[p.id] = URL.createObjectURL(rec.blob));
+    const d = document.createElement("div"); d.className = "ph";
+    d.innerHTML = `<img src="${url}" alt="Job photo"><button class="x" aria-label="Remove photo">✕</button>${p.driveUrl ? `<span class="cloud">☁️ Drive</span>` : ""}`;
+    d.querySelector("img").onclick = () => { const m = document.createElement("div"); m.className = "modal"; m.innerHTML = `<img src="${url}" alt="">`; m.onclick = () => m.remove(); document.body.append(m); };
+    d.querySelector(".x").onclick = async () => { if (!confirm("Remove this photo from the app? (A copy already in Google Drive stays there.)")) return; await photoDel(p.id); j.photos = j.photos.filter(x => x !== p); URL.revokeObjectURL(url); delete urlCache[p.id]; save(); render(); };
+    box.append(d);
+  }
+}
+
+function viewPay(app) {
+  const jobs = state.jobs;
+  const earned = jobs.reduce((a, j) => a + (Number(j.pay) || 0), 0), paid = jobs.reduce((a, j) => a + paidOf(j), 0), owed = jobs.reduce((a, j) => a + owedOf(j), 0);
+  const unpaid = jobs.filter(j => owedOf(j) > 0).sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  const pays = jobs.flatMap(j => (j.payments || []).map(p => ({ ...p, job: j }))).sort((a, b) => b.date.localeCompare(a.date));
+  $("#sub").textContent = "";
+  app.innerHTML = `
+    <div class="grid" style="margin-bottom:12px">
+      <div class="stat"><div class="muted">Owed to me</div><div class="big owed">${money(owed)}</div></div>
+      <div class="stat"><div class="muted">Received</div><div class="big paid">${money(paid)}</div></div>
+    </div>
+    <div class="muted" style="margin-bottom:8px">Total job pay logged: ${money(earned)}</div>
+    <h2>Waiting on payment</h2>
+    ${unpaid.length ? unpaid.map(j => `<div class="card job" data-id="${j.id}"><div class="row"><strong>${esc(j.title || "Untitled job")}</strong><strong style="color:var(--warn)">${money(owedOf(j))}</strong></div><div class="muted">${fmtDate(j.date)} · ${esc(j.address)}</div>
+      <div class="actions"><button class="small primary" data-full="${j.id}">✓ Mark paid in full today</button></div></div>`).join("") : `<div class="empty">Nothing owed. 🎉</div>`}
+    <h2>Payments received</h2>
+    ${pays.length ? pays.map(p => `<div class="pay"><span>${fmtDate(p.date)}<br><span class="muted">${esc(p.job.title || "Untitled job")}${p.note ? " · " + esc(p.note) : ""}</span></span><strong style="color:var(--good)">${money(p.amount)}</strong></div>`).join("") : `<div class="muted">No payments recorded yet.</div>`}`;
+  app.querySelectorAll(".job").forEach(c => c.onclick = e => { if (e.target.closest("button")) return; tab = "jobs"; openJobId = c.dataset.id; render(); });
+  app.querySelectorAll("[data-full]").forEach(b => b.onclick = () => {
+    const j = jobs.find(x => x.id === b.dataset.full);
+    (j.payments = j.payments || []).push({ id: uid(), amount: owedOf(j), date: today(), note: "Paid in full" }); save(); render();
+  });
+}
+
+function viewSummary(app) {
+  $("#sub").textContent = "";
+  const byMonth = {};
+  state.jobs.forEach(j => { const m = (j.date || "").slice(0, 7) || "none"; const r = byMonth[m] ||= { jobs: 0, pay: 0, paid: 0, hours: 0 }; r.jobs++; r.pay += Number(j.pay) || 0; r.paid += paidOf(j); r.hours += Number(j.hours) || 0; });
+  const months = Object.keys(byMonth).sort().reverse();
+  const hrs = state.jobs.reduce((a, j) => a + (Number(j.hours) || 0), 0), pay = state.jobs.reduce((a, j) => a + (Number(j.pay) || 0), 0);
+  app.innerHTML = `
+    <div class="grid">
+      <div class="stat"><div class="muted">Jobs</div><div class="big">${state.jobs.length}</div></div>
+      <div class="stat"><div class="muted">Photos</div><div class="big">${state.jobs.reduce((a, j) => a + (j.photos || []).length, 0)}</div></div>
+      <div class="stat"><div class="muted">Total job pay</div><div class="big">${money(pay)}</div></div>
+      <div class="stat"><div class="muted">${hrs ? "Avg $/hour" : "Hours logged"}</div><div class="big">${hrs ? money(pay / hrs) : "0"}</div></div>
+    </div>
+    <h2>By month</h2>
+    ${months.length ? months.map(m => { const r = byMonth[m]; return `<div class="card"><div class="row"><strong>${m === "none" ? "No date" : new Date(m + "-15").toLocaleDateString(undefined, { month: "long", year: "numeric" })}</strong><span class="muted">${r.jobs} job${r.jobs > 1 ? "s" : ""}</span></div>
+      <div class="row"><span>Pay ${money(r.pay)}</span><span>Received ${money(r.paid)}</span><span style="color:var(--warn)">Owed ${money(Math.max(0, r.pay - r.paid))}</span></div></div>`; }).join("") : `<div class="empty">Add jobs to see a summary.</div>`}
+    <div class="actions"><button id="csv">⬇️ Export jobs (CSV)</button></div>`;
+  $("#csv").onclick = () => {
+    const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const rows = [["Date","Job","Customer","Address","Status","Hours","Job pay","Paid","Owed","Notes"].map(q).join(",")]
+      .concat(state.jobs.map(j => [j.date, j.title, j.client, j.address, j.status, j.hours, j.pay, paidOf(j), owedOf(j), j.notes].map(q).join(",")));
+    download("jobs.csv", new Blob([rows.join("\n")], { type: "text/csv" }));
+  };
+}
+
+function download(name, blob) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
+
+function viewSettings(app) {
+  $("#sub").textContent = "";
+  app.innerHTML = `
+    <div class="card">
+      <h2 style="margin-top:0">Google Drive photo backup</h2>
+      <p class="muted">Photos are saved on this phone first. To also copy them to your own Google Drive, paste a Google OAuth Client ID here (one-time setup, see README.md in this folder). The app can only touch files it creates itself.</p>
+      <label>Google OAuth Client ID</label><input id="s-cid" value="${esc(state.settings.clientId)}" placeholder="1234-abc.apps.googleusercontent.com" autocapitalize="off" autocorrect="off">
+      <div class="actions"><button class="primary" id="s-save">Save</button></div>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Backup</h2>
+      <p class="muted">Jobs and pay are stored in this browser. Export a backup now and then so nothing gets lost if you clear your browser data or change phones. (Photos go to Drive; the backup file has jobs and pay only.)</p>
+      <div class="actions"><button id="exp">⬇️ Export backup</button>
+        <label style="margin:0"><span style="display:inline-block;border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer">⬆️ Import backup</span><input id="imp" type="file" accept="application/json" style="display:none"></label></div>
+    </div>`;
+  $("#s-save").onclick = () => { state.settings.clientId = $("#s-cid").value.trim(); save(); toast("Saved"); };
+  $("#exp").onclick = () => download(`job-tracker-backup-${today()}.json`, new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }));
+  $("#imp").onchange = async e => {
+    try {
+      const d = JSON.parse(await e.target.files[0].text());
+      if (!Array.isArray(d.jobs)) throw 0;
+      if (!confirm(`Replace current data with ${d.jobs.length} jobs from this backup?`)) return;
+      d.jobs.forEach(j => { j.photos = (j.photos || []).filter(p => p.driveUrl); }); // photo blobs aren't in the backup
+      state = { ...state, jobs: d.jobs, settings: { ...state.settings, ...(d.settings || {}) } }; save(); toast("Backup restored"); render();
+    } catch { toast("That file isn't a valid backup"); }
+  };
+}
+
+/* ---------- Google Drive (Google Identity Services, drive.file scope) ---------- */
+let gisLoaded = null, token = null, tokenExp = 0;
+function loadGIS() {
+  return gisLoaded ||= new Promise((res, rej) => { const s = document.createElement("script"); s.src = "https://accounts.google.com/gsi/client"; s.onload = res; s.onerror = () => { gisLoaded = null; rej(new Error("Can't reach Google (offline?)")); }; document.head.append(s); });
+}
+async function getToken() {
+  if (token && Date.now() < tokenExp) return token;
+  await loadGIS();
+  return new Promise((res, rej) => {
+    google.accounts.oauth2.initTokenClient({
+      client_id: state.settings.clientId, scope: "https://www.googleapis.com/auth/drive.file",
+      callback: r => r.access_token ? (token = r.access_token, tokenExp = Date.now() + (r.expires_in - 60) * 1000, res(token)) : rej(new Error(r.error || "Sign-in failed")),
+      error_callback: e => rej(new Error(e.type || "Sign-in cancelled")),
+    }).requestAccessToken();
+  });
+}
+async function gfetch(url, opts = {}) {
+  const r = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), Authorization: "Bearer " + await getToken() } });
+  if (!r.ok) throw new Error(`Drive error ${r.status}`);
+  return r.json();
+}
+async function ensureFolder(name, parent) {
+  const q = `name='${name.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false${parent ? ` and '${parent}' in parents` : ""}`;
+  const f = await gfetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`);
+  if (f.files.length) return f.files[0].id;
+  const c = await gfetch("https://www.googleapis.com/drive/v3/files?fields=id", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, mimeType: "application/vnd.google-apps.folder", ...(parent ? { parents: [parent] } : {}) }) });
+  return c.id;
+}
+async function uploadJobToDrive(j) {
+  if (!state.settings.clientId) { toast("Add your Google Client ID in Settings first", 4000); tab = "settings"; return render(); }
+  const todo = (j.photos || []).filter(p => !p.driveUrl);
+  if (!todo.length) return toast("All photos are already in Drive");
+  try {
+    toast("Connecting to Google…");
+    const root = await ensureFolder("Painter Jobs");
+    const folder = await ensureFolder(`${j.date || "undated"} - ${j.title || "Job"}`.replace(/[\/\\]/g, "-"), root);
+    let n = 0;
+    for (const p of todo) {
+      const rec = await photoGet(p.id); if (!rec) continue;
+      const boundary = "b" + uid(), meta = JSON.stringify({ name: `${j.date || "photo"}-${p.id}.jpg`, parents: [folder] });
+      const body = new Blob([`--${boundary}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: image/jpeg\r\n\r\n`, rec.blob, `\r\n--${boundary}--`]);
+      const out = await gfetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink", { method: "POST", headers: { "Content-Type": `multipart/related; boundary=${boundary}` }, body });
+      p.driveUrl = out.webViewLink || out.id; n++; save(); toast(`Uploaded ${n}/${todo.length}`, 1200);
+    }
+    toast(`Saved ${n} photo${n === 1 ? "" : "s"} to Drive › Painter Jobs`, 4000); render();
+  } catch (e) { toast("Drive upload failed: " + e.message, 5000); }
+}
+
+/* ---------- boot ---------- */
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => { tab = b.dataset.tab; if (tab === "jobs") { openJobId = null; editing = false; } render(); });
+load(); render();
+if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
+</script>
+</body>
+</html>
