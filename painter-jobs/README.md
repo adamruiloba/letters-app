@@ -1,25 +1,31 @@
-# Job Tracker (painter jobs & pay)
+# Job Tracker (painter jobs, time & pay)
 
-A single-file web app: `index.html`. No install, no server, no account needed.
+One file: `index.html`. Hosted for free with GitHub Pages, data stored in **your own Google account**.
 
-## What it does
-- **Jobs**: name, customer, location (with a Map link), date, status, hours, and notes on what you did.
-- **Photos**: add from your camera or gallery. They're resized and stored on the phone, and one tap copies them to your Google Drive.
-- **Pay**: set what each job pays, record payments (amount, date, note), see what you're still owed, and tap "Mark paid in full".
-- **Summary**: totals, average $/hour, and a month-by-month breakdown. Export to CSV.
-- **Backup**: export or import a JSON file of your jobs and pay.
+## How it works day to day
+1. **Clock In**: one tap. It uses your phone's location to find the street address and saves it as a job site. Go back to the same site later and it recognizes it, and pre-fills the pay from last time.
+2. **Clock Out**: one tap. You land on the job page. Add what you did, the pay and photos if you want.
+3. **Jobs tab**: every job by date. Search by address or notes, or pick a date. Open any job to see earlier jobs at the same address.
+4. **Pay tab**: what you're owed, what you've been paid, hours, average $/hour and a month-by-month total. "Mark paid in full" is one tap.
 
-## Using it on your phone
-Host the folder (GitHub Pages works: Settings → Pages → deploy from branch, then open `/painter-jobs/`), open the link on your phone, and use "Add to Home Screen". Data stays in that browser on that device, so use the Backup button regularly.
+## Put it online (same way as Letters)
+1. In your GitHub repo choose **Add file → Upload files**, upload the `painter-jobs` folder's `index.html`, and commit.
+2. Repo **Settings → Pages**: deploy from the main branch (you probably already did this for Letters).
+3. Open `https://YOURNAME.github.io/REPO/painter-jobs/` on your phone and use **Add to Home Screen**.
 
-You can also just open `index.html` locally to try it. Google Drive sign-in needs it served over `https://` (or `localhost`).
+## Turn on Google sync (one time, ~5 min)
+Creates a Google Sheet called "Painter Job Tracker" and a Drive folder "Painter Jobs/<address>" for photos. Sign in with the same Google account on any phone and everything shows up.
 
-## Turning on Google Drive photo backup (one-time, ~5 min)
-1. Go to <https://console.cloud.google.com/>, create a project (any name).
-2. **APIs & Services → Library** → enable **Google Drive API**.
-3. **APIs & Services → OAuth consent screen** → External, fill in the app name and your email, and add yourself as a **Test user**.
-4. **Credentials → Create credentials → OAuth client ID → Web application**. Under **Authorized JavaScript origins**, add the address where you host the app (e.g. `https://YOURNAME.github.io`).
-5. Copy the Client ID into the app's **Settings** tab.
-6. Open a job with photos and tap **Save to Google Drive**. Photos land in `Painter Jobs/<date> - <job name>/`.
+1. <https://console.cloud.google.com/> → create a project.
+2. **APIs & Services → Library**: enable **Google Drive API** and **Google Sheets API**.
+3. **OAuth consent screen**: External, add your app name and email, add yourself as a **Test user**.
+4. **Credentials → Create credentials → OAuth client ID → Web application**. Under **Authorized JavaScript origins** add `https://YOURNAME.github.io`.
+5. Paste the Client ID into the app's **Settings** tab and tap **Save & sync**.
 
-The app uses the `drive.file` scope, so it can only see files it created, never the rest of your Drive.
+The app only has the `drive.file` permission, so it can only see files it created itself.
+
+## Good to know
+- It works offline and saves on the phone first. Tap **Sync** (top right) when you have signal. It also syncs by itself a few seconds after changes while you're signed in.
+- The Google Sheet is readable by you. Open it any time, or share it with someone.
+- Location needs permission the first time. If it can't find you, pick or type the address instead.
+- Address lookup uses OpenStreetMap's free service, so addresses are usually right but you can edit them on the job page.
