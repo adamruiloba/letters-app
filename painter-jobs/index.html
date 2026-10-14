@@ -153,7 +153,7 @@ async function reverseGeocode(lat, lng) {
 }
 
 /* ---------- clock in / out ---------- */
-let busy = false;
+let busy = false, pending = null;
 async function clockIn() {
   if (busy || activeVisit()) return;
   busy = true; render();
@@ -161,11 +161,10 @@ async function clockIn() {
   try {
     const c = await getPosition(), here = { lat: c.latitude, lng: c.longitude };
     const near = state.sites.filter(s => live(s) && s.lat !== "" && s.lat != null).map(s => ({ s, d: meters(here, { lat: +s.lat, lng: +s.lng }) })).sort((a, b) => a.d - b.d)[0];
-    if (near && near.d < 150) site = near.s;
+    if (near && near.d < 300) site = near.s; // a saved site always keeps its saved address
     else {
       let address = ""; try { address = await reverseGeocode(here.lat, here.lng); } catch {}
-      site = touch({ id: uid(), name: "", address: address || "New job site", lat: here.lat, lng: here.lng, lastPay: "", deleted: false });
-      state.sites.push(site);
+      pending = { here, address }; busy = false; return render(); // new place: let the user confirm/edit before anything is saved
     }
   } catch (e) {
     toast("Couldn't get your location — pick a site below", 3500);
@@ -222,12 +221,31 @@ function viewClock(app, sub) {
     <p class="muted" style="text-align:center">Uses your location to find (or save) the job site.</p>
     <div class="actions" style="justify-content:center"><button class="small" id="manual">Choose site manually</button></div>
     <div id="choose"></div>
+    ${recentSites().length ? `<h2>Back to a job site</h2>${recentSites().map(s => `<button style="width:100%;text-align:left;margin-bottom:8px" data-site="${s.id}">▶ Clock in at <strong>${esc(s.address)}</strong></button>`).join("")}` : ""}
     <h2>Today ${todays.length ? `<span class="muted">· ${fmtHrs(todayHrs)}</span>` : ""}</h2>
     ${todays.length ? todays.map(v => visitCard(v)).join("") : `<div class="muted">No finished jobs yet today.</div>`}`;
   $("#in").onclick = clockIn;
+  app.querySelectorAll("[data-site]").forEach(b => b.onclick = () => startVisit(state.sites.find(s => s.id === b.dataset.site)));
+  if (pending) confirmNewSite($("#choose"));
   $("#manual").onclick = () => chooseSiteUI($("#choose"), startVisit);
   app.querySelectorAll("[data-v]").forEach(c => c.onclick = () => { openVisit = c.dataset.v; tab = "jobs"; render(); });
   if (sub === "choose") chooseSiteUI($("#choose"), startVisit);
+}
+function recentSites() {
+  const last = {}; visits().forEach(v => { if (!last[v.siteId] || v.start > last[v.siteId]) last[v.siteId] = v.start; });
+  return state.sites.filter(s => live(s) && last[s.id]).sort((a, b) => last[b.id].localeCompare(last[a.id])).slice(0, 4);
+}
+function confirmNewSite(box) {
+  const { here, address } = pending;
+  box.innerHTML = `<div class="card" id="pick"><strong>New job site</strong><div class="muted">This address will be saved and reused every time you clock in or out at this job. Fix it if it's off.</div>
+    <label>Address</label><input id="nw-addr" value="${esc(address)}" placeholder="Type the address" autocapitalize="words">
+    <div class="actions"><button class="primary" id="nw-go">Clock in here</button><button class="small" id="nw-x">Cancel</button></div></div>`;
+  $("#nw-x").onclick = () => { pending = null; render(); };
+  $("#nw-go").onclick = () => {
+    const a = $("#nw-addr").value.trim(); if (!a) return toast("Enter an address");
+    const site = touch({ id: uid(), name: "", address: a, lat: here.lat, lng: here.lng, lastPay: "", deleted: false });
+    state.sites.push(site); pending = null; startVisit(site);
+  };
 }
 function chooseSiteUI(box, onPick) {
   const sites = state.sites.filter(live);

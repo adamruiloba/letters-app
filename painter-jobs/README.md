@@ -3,7 +3,7 @@
 One file: `index.html`. Hosted for free with GitHub Pages, data stored in **your own Google account**.
 
 ## How it works day to day
-1. **Clock In**: one tap. It uses your phone's location to find the street address and saves it as a job site. Go back to the same site later and it recognizes it, and pre-fills the pay from last time.
+1. **Clock In**: one tap. At a brand-new place it guesses the street address and shows it in a box so you can fix it before anything is saved. After that the address is yours: every later clock-in or clock-out at that job reuses it and never guesses again, even if you're parked a bit away. Your recent job sites also show up as one-tap buttons, and pay is pre-filled from last time.
 2. **Clock Out**: one tap. You land on the job page. Add what you did, the pay and photos if you want.
 3. **Jobs tab**: every job by date. Search by address or notes, or pick a date. Open any job to see earlier jobs at the same address.
 4. **Pay tab**: what you're owed, what you've been paid, hours, average $/hour and a month-by-month total. "Mark paid in full" is one tap.
