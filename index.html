@@ -178,6 +178,72 @@
   .big.rec { background: #d62839; box-shadow: 0 5px 0 #8f1623; }
   .big[disabled] { opacity: .4; }
 
+  /* ---------- Games menu + Patterns ---------- */
+  #games .cards { max-width: 760px; margin: 20px auto 0; padding: 0 18px 40px; }
+  #pattern { max-width: 620px; margin: 0 auto; padding: 14px 16px 36px; text-align: center; --c: #f5a300; --d: #b87800; }
+  #pseq { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 28px auto 10px; max-width: 560px; }
+  .pitem {
+    width: clamp(46px, 12.5vw, 70px); height: clamp(46px, 12.5vw, 70px);
+    display: grid; place-items: center; background: var(--paper); border-radius: 16px;
+    box-shadow: 0 4px 0 rgba(29,43,83,.22); font-size: clamp(1.6rem, 6.5vw, 2.6rem);
+  }
+  .pitem.slot { background: transparent; box-shadow: none; border: 4px dashed var(--ink); color: var(--ink); }
+  .pitem.fill { animation: bounce .4s; }
+  .pface { display: grid; place-items: center; width: 100%; height: 100%; }
+  .pdot { display: block; width: 68%; height: 68%; border-radius: 50%; box-shadow: inset 0 -4px 0 rgba(0,0,0,.15); }
+  #pchoices { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 28px; }
+  .choice {
+    width: clamp(86px, 25vw, 132px); height: clamp(86px, 25vw, 132px);
+    border: 0; border-radius: 26px; background: var(--paper);
+    box-shadow: 0 6px 0 rgba(29,43,83,.25); font-size: clamp(2.8rem, 11vw, 4.6rem);
+    display: grid; place-items: center; padding: 0;
+  }
+  .choice:active { transform: translateY(5px); box-shadow: 0 1px 0 rgba(29,43,83,.25); }
+  .choice.hint { outline: 5px solid var(--ink); outline-offset: 3px; animation: glow 1.4s ease-in-out infinite; }
+
+  /* ---------- Patterns: hub, lesson, copy ---------- */
+  #games .cards, #phub .cards { max-width: 760px; margin: 20px auto 0; padding: 0 18px 40px; }
+  .phint { text-align: center; font-size: 1.3rem; margin: 8px 0 0; min-height: 1.5em; }
+  .card.glow { animation: glow 1.4s ease-in-out infinite; }
+  #lesson, #copy { max-width: 620px; margin: 0 auto; padding: 14px 16px 36px; text-align: center; --c: #f5a300; --d: #b87800; }
+  .ldots { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
+  .ldots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(29,43,83,.2); }
+  .ldots i.on { background: var(--ink); }
+  .lcap { font-size: clamp(1.6rem, 6vw, 2.3rem); min-height: 2.4em; margin: 16px 0 4px; }
+  .lrow { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 14px auto; max-width: 560px; min-height: 60px; }
+  #cmine { border-top: 4px dotted rgba(29,43,83,.25); padding-top: 18px; margin-top: 20px; }
+  .lopts { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 18px; }
+  .lbtns { margin-top: 22px; }
+  .pitem.hl { outline: 4px solid var(--ink); outline-offset: 3px; animation: bounce .5s; }
+  .prow {
+    width: 100%; display: flex; gap: 8px; justify-content: center; padding: 14px 10px; border: 0;
+    border-radius: 22px; background: rgba(255,255,255,.6); box-shadow: 0 5px 0 rgba(29,43,83,.22);
+  }
+  .prow:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(29,43,83,.22); }
+  .prow .pitem { width: clamp(34px, 10.5vw, 58px); height: clamp(34px, 10.5vw, 58px); font-size: clamp(1.2rem, 5vw, 2rem); }
+  .prow.hint { outline: 5px solid var(--ink); outline-offset: 3px; animation: glow 1.4s ease-in-out infinite; }
+
+  /* ---------- Rewards ---------- */
+  .csub { font-size: 1.3rem; }
+  .spark { position: fixed; z-index: 9; font-size: 1.3rem; pointer-events: none; margin: -.65rem 0 0 -.65rem; animation: spark .8s ease-out forwards; }
+  @keyframes spark { from { opacity: 1; transform: translate(0,0) scale(.6); } to { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.3); } }
+  .starfloat { position: fixed; z-index: 9; font-size: 1.8rem; pointer-events: none; transform: translate(-50%, -50%); animation: floatup 1s ease-out forwards; }
+  @keyframes floatup { from { opacity: 1; margin-top: 0; } to { opacity: 0; margin-top: -80px; } }
+  .friend { position: fixed; bottom: 14px; left: -90px; font-size: 3.4rem; z-index: 8; pointer-events: none; animation: cameo 2.6s ease-in-out forwards; }
+  @keyframes cameo { 0% { transform: translate(0,0); } 25% { transform: translate(25vw,-14px); } 50% { transform: translate(50vw,0); } 75% { transform: translate(75vw,-14px); } 100% { transform: translate(calc(100vw + 120px),0); } }
+  #stickerPop { position: fixed; inset: 0; z-index: 8; background: rgba(29,43,83,.6); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #fff; text-align: center; padding: 20px; cursor: pointer; }
+  .spTitle { font-size: clamp(1.8rem, 7vw, 2.6rem); }
+  .spIcon { font-size: clamp(7rem, 36vw, 11rem); line-height: 1.1; animation: popin .7s ease-out; }
+  .spName { font-size: clamp(1.6rem, 6vw, 2.2rem); }
+  .spHint { font-size: 1rem; opacity: .85; margin-top: 12px; }
+  @keyframes popin { 0% { transform: scale(.2) rotate(-20deg); opacity: 0; } 70% { transform: scale(1.15) rotate(6deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+  #stickers { max-width: 640px; margin: 0 auto; padding-bottom: 40px; }
+  #stkGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 14px; padding: 8px 18px; }
+  .stk { border: 0; background: var(--paper); border-radius: 22px; padding: 12px 6px; box-shadow: 0 5px 0 rgba(29,43,83,.2); display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink); font-family: inherit; }
+  .stk:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(29,43,83,.2); }
+  .stkIcon { font-size: 3.4rem; line-height: 1.1; }
+  .stkName { font-size: 1rem; }
+
   /* ---------- Celebration ---------- */
   .pop {
     position: fixed; top: -40px; font-size: 2rem; pointer-events: none; z-index: 10;
@@ -185,8 +251,8 @@
   }
   @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) {
-    .pop { display: none; }
-    .shake, .bounce, .tile.current, .tile.current.bounce { animation: none; }
+    .pop, .spark, .starfloat, .friend { display: none; }
+    .shake, .bounce, .tile.current, .tile.current.bounce, .pitem.fill, .choice.hint, .pitem.hl, .card.glow, .prow.hint, .spIcon { animation: none; }
     * { transition: none !important; }
   }
 </style>
@@ -203,8 +269,11 @@
     <button class="card" id="goPaint" style="--c:#06a99a;--d:#04776c" aria-label="Draw">
       <span class="cicon">&#127912;</span><span class="clabel">Draw</span>
     </button>
-    <button class="card" id="goGame" style="--c:#7b5cff;--d:#5238c7" aria-label="Letter game">
-      <span class="cicon">&#128269;</span><span class="clabel">Letter Game</span>
+    <button class="card" id="goGame" style="--c:#7b5cff;--d:#5238c7" aria-label="Games">
+      <span class="cicon">&#127918;</span><span class="clabel">Games</span>
+    </button>
+    <button class="card" id="goStickers" style="--c:#e0619b;--d:#a83c6e" aria-label="My stickers">
+      <span class="cicon">&#127775;</span><span class="clabel">My Stickers</span><span class="csub" id="cardStars">&#11088; 0</span>
     </button>
   </div>
 </section>
@@ -309,10 +378,100 @@
   <p class="note">Each saved file is named for its letter (like <b>f.wav</b>). Put the files in a folder called <b>sounds</b> right next to index.html. The app uses your recording for that letter and falls back to the old sound for any you haven't recorded.</p>
 </section>
 
+<!-- My stickers -->
+<section id="stickers" hidden>
+  <div class="top">
+    <button class="pill" id="stHome">&larr; Home</button>
+    <h1>My Stickers</h1>
+    <span class="score">&#11088; <span id="stkStars">0</span></span>
+  </div>
+  <p class="phint" id="stkHint"></p>
+  <div id="stkGrid"></div>
+</section>
+
+<!-- Games menu -->
+<section id="games" hidden>
+  <div class="top">
+    <button class="pill" id="gmHome">&larr; Home</button>
+    <h1>Games</h1>
+    <span></span>
+  </div>
+  <div class="cards">
+    <button class="card" id="goLetterGame" style="--c:#7b5cff;--d:#5238c7" aria-label="Letter game">
+      <span class="cicon">&#128269;</span><span class="clabel">Letter Game</span>
+    </button>
+    <button class="card" id="goPattern" style="--c:#f5a300;--d:#b87800" aria-label="Patterns">
+      <span class="cicon">&#128308;&#128309;</span><span class="clabel">Patterns</span>
+    </button>
+  </div>
+</section>
+
+<!-- Patterns hub: learn, copy, play -->
+<section id="phub" hidden>
+  <div class="top">
+    <button class="pill" id="phHome">&larr; Games</button>
+    <h1>Patterns</h1>
+    <span></span>
+  </div>
+  <p class="phint" id="phint"></p>
+  <div class="cards">
+    <button class="card" id="pbLearn" style="--c:#f5a300;--d:#b87800" aria-label="Learn what a pattern is">
+      <span class="cicon">&#128161;</span><span class="clabel" id="plearnLbl">1. Learn</span>
+    </button>
+    <button class="card" id="pbCopy" style="--c:#06a99a;--d:#04776c" aria-label="Copy the pattern">
+      <span class="cicon">&#128111;</span><span class="clabel">2. Copy it</span>
+    </button>
+    <button class="card" id="pbNext" style="--c:#7b5cff;--d:#5238c7" aria-label="What comes next">
+      <span class="cicon">&#10067;</span><span class="clabel">3. What's next?</span>
+    </button>
+  </div>
+</section>
+
+<!-- Lesson: what is a pattern? -->
+<section id="lesson" hidden>
+  <div class="bar">
+    <button class="pill" id="lBack">&larr; Patterns</button>
+    <button class="pill" id="lagain">&#128260; Again</button>
+  </div>
+  <div class="ldots" id="ldots"></div>
+  <p class="lcap" id="lcap"></p>
+  <div class="lrow" id="lrow"></div>
+  <div class="lopts" id="lopts"></div>
+  <div class="actions lbtns" id="lbtns"></div>
+</section>
+
+<!-- Copy it: make the same pattern -->
+<section id="copy" hidden>
+  <div class="bar">
+    <button class="pill" id="cBack">&larr; Patterns</button>
+    <span class="score">&#11088; <span id="cscore">0</span></span>
+  </div>
+  <p class="lcap">Copy the pattern!</p>
+  <div class="lrow" id="cseq"></div>
+  <div class="lrow" id="cmine"></div>
+  <div class="lopts" id="cpal"></div>
+  <button class="feat" id="clisten" aria-label="Hear the pattern again" style="margin: 18px auto 0">
+    <span class="ficon">&#128266;</span><span>Listen</span>
+  </button>
+</section>
+
+<!-- Patterns: what comes next? -->
+<section id="pattern" hidden>
+  <div class="bar">
+    <button class="pill" id="ptHome">&larr; Patterns</button>
+    <span class="score">&#11088; <span id="pscore">0</span></span>
+  </div>
+  <div id="pseq"></div>
+  <button class="feat" id="plisten" aria-label="Hear the pattern again" style="margin: 14px auto 0">
+    <span class="ficon">&#128266;</span><span>Listen</span>
+  </button>
+  <div id="pchoices"></div>
+</section>
+
 <!-- Game: find the letter -->
 <section id="game" hidden>
   <div class="bar">
-    <button class="pill" id="gHome">&larr; Home</button>
+    <button class="pill" id="gHome">&larr; Games</button>
     <button class="pill" id="modeSnd2" aria-label="Switch between letter names and letter sounds">Name</button>
     <span class="score">&#11088; <span id="score">0</span></span>
   </div>
@@ -321,6 +480,14 @@
   </button>
   <div id="choices"></div>
 </section>
+
+<!-- New sticker celebration -->
+<div id="stickerPop" hidden role="dialog" aria-label="New sticker">
+  <div class="spTitle">New sticker!</div>
+  <div class="spIcon" id="spIcon"></div>
+  <div class="spName" id="spName"></div>
+  <div class="spHint">Tap to keep playing</div>
+</div>
 
 <script>
 (function () {
@@ -333,6 +500,9 @@
   var TAPS_TO_LEARN = 5;
   // The name the voice uses when praising. {name} in a phrase becomes this.
   var KID_NAME = "Alex";
+  // Rewards: a soft chime on each success, and an occasional animal friend that runs across.
+  var REWARD_SOUNDS = true;
+  var REWARD_FRIENDS = true;
   // ====================================
 
   // How the voice says each letter's NAME and its SOUND.
@@ -364,13 +534,20 @@
 
   // Phrases said after a good answer. One is picked at random each time.
   var PRAISE = [
-    "Good job, {name}!", "Great job, {name}!", "Awesome, {name}!",
-    "You did it, {name}!", "Way to go, {name}!", "Super job, {name}!",
-    "Amazing, {name}!", "That's right, {name}!", "High five, {name}!",
-    "You're so smart, {name}!", "Fantastic!", "Excellent!", "Wow, nice work!",
-    "Yay, {name}!", "Keep it up, {name}!", "You got it!", "Perfect!",
-    "I'm proud of you, {name}!"
+    "Good job, {name}!", "Great job, {name}!", "You did it, {name}!", "Way to go, {name}!",
+    "Yay, {name}!", "That's right, {name}!", "High five, {name}!", "Hooray, {name}!",
+    "Wow, nice work!", "You got it!", "Perfect!"
   ];
+  // Praise that names what he DID (effort and strategy), which research links to
+  // better attitudes toward challenges, instead of calling him smart.
+  var PRAISE_BY = {
+    letter:  ["You practiced that letter, {name}!", "Nice practicing, {name}!", "You kept saying it, {name}!"],
+    trace:   ["You followed all the arrows, {name}!", "You traced it carefully, {name}!", "You started in the right spot, {name}!", "Nice slow tracing, {name}!"],
+    listen:  ["You listened carefully, {name}!", "Good listening, {name}!", "You found the right letter, {name}!"],
+    pattern: ["You noticed the pattern, {name}!", "You saw what repeats, {name}!", "Nice thinking, {name}!"],
+    copy:    ["You copied it just right, {name}!", "You looked closely, {name}!", "Nice careful copying, {name}!"],
+    retry:   ["You tried again and got it, {name}!", "You kept trying, {name}!", "You didn't give up, {name}!"]
+  };
   // Phrases said after a wrong answer (always kind).
   var TRY_AGAIN = [
     "Nice try, {name}! Try again.", "Almost! Try again.",
@@ -406,13 +583,14 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var view = $("view"), grid = $("grid");
-  var screens = { dash: $("dash"), letters: $("letters"), tgrid: $("tgrid"), rec: $("rec"), view: view, paint: $("paint"), game: $("game") };
+  var screens = { dash: $("dash"), letters: $("letters"), tgrid: $("tgrid"), rec: $("rec"), games: $("games"), stickers: $("stickers"), phub: $("phub"), lesson: $("lesson"), copy: $("copy"), pattern: $("pattern"), view: view, paint: $("paint"), game: $("game") };
 
   function show(name) {
     for (var k in screens) screens[k].hidden = (k !== name);
     window.scrollTo(0, 0);
     stopDemo();
     stopAudio();
+    clearTimeout(gameTimer); clearTimeout(pTimer); lStop(); clearTimeout(cTimer); rewardToken++; clearTimeout(rewardTimer); $("stickerPop").hidden = true;
     if ("speechSynthesis" in window) { try { window.speechSynthesis.cancel(); } catch (e) {} }
   }
   var stage = $("stage"), guide = $("guide"), draw = $("draw");
@@ -535,6 +713,11 @@
   }
   function praise() { return pick(PRAISE, "praise"); }
   function retry() { return pick(TRY_AGAIN, "retry"); }
+  function praiseFor(kind, missed) {
+    var list = missed ? PRAISE_BY.retry : (PRAISE_BY[kind] || PRAISE);
+    if (!missed && Math.random() < 0.2) list = PRAISE;    // now and then, a plain cheer
+    return pick(list, "pf" + (missed ? "retry" : kind));
+  }
 
   // Name mode says "bee"; Sound mode says "buh". One setting, used on the
   // Letters screen and in the Letter Game.
@@ -609,9 +792,13 @@
     if (taps >= TAPS_TO_LEARN) {
       taps = 0; progress = i + 1; saveLearn();
       setTimeout(function () {
-        confetti();
-        say(progress >= WORDS.length ? KID_NAME + ", you learned all the letters! Amazing!" : praise());
         buildGrid(); scrollToCurrent();
+        var all = progress >= WORDS.length;
+        win("letter", {
+          el: grid.children[i],
+          special: all ? "alpha" : null,
+          line: all ? KID_NAME + ", you learned all the letters! Amazing!" : null
+        });
       }, 1200);
     }
   }
@@ -666,10 +853,11 @@
   }
 
   // ---------- Letter view ----------
-  var strokeMasks = [], demoFor = -1, maskArr, allowArr, ink = "#ef476f", finished = false, drawing = false, last = null, moves = 0;
+  var strokeOk = [], traceMiss = false, strokeMasks = [], demoFor = -1, maskArr, allowArr, ink = "#ef476f", finished = false, drawing = false, last = null, moves = 0;
 
   function openLetter(i, speak) {
     current = (i + WORDS.length) % WORDS.length;
+    traceMiss = false;
     var w = WORDS[current];
     var col = COLORS[current % COLORS.length];
     ink = col[0];
@@ -913,7 +1101,7 @@
       }
       return n >= 12 ? own : m;
     });
-    demoFor = -1;
+    demoFor = -1; strokeOk = [];
     allowArr = alphaGrid(strokes, ALLOW_W);
     finished = false;
     $("fill").style.width = "0%";
@@ -975,13 +1163,18 @@
     var next = -1;
     for (i = 0; i < covs.length; i++) if (covs[i] < NEED) { next = i; break; }
 
+    var fresh = [];
+    covs.forEach(function (c, k) { if (c >= NEED && !strokeOk[k]) { strokeOk[k] = true; fresh.push(k); } });
+    var allDone = next === -1 && off <= MAX_STRAY;
+    if (!allDone) fresh.forEach(strokeTick);   // a soft tick for each stroke he finishes
+
     var hint;
     if (next === -1 && off <= MAX_STRAY) {
       finished = true;
       celebrate();
       return;
     } else if (next === -1) {
-      hint = "Almost! Stay on the letter";
+      hint = "Almost! Stay on the letter"; traceMiss = true;
     } else if (covs[next] < 0.15 && covs.length > 1) {
       hint = "Now do number " + (next + 1);
     } else {
@@ -999,8 +1192,15 @@
     var key = WORDS[current][0];
     done[key] = true; save(); buildTraceGrid();
     $("hint").textContent = "Great job!";
-    say(praise());
-    confetti();
+    win("trace", { el: stage, missed: traceMiss });
+  }
+
+  function strokeTick(k) {
+    var st = strokesFor()[k];
+    if (!st) return;
+    var r = stage.getBoundingClientRect(), pt = st[st.length - 1];
+    chime("tick", k);
+    sparkle(r.left + pt[0] / 100 * r.width, r.top + pt[1] / 100 * r.height, 4);
   }
 
   function confetti() {
@@ -1033,10 +1233,22 @@
   $("goPaint").addEventListener("click", function () { show("tgrid"); });
   $("freeDraw").addEventListener("click", function () { show("paint"); setupPaint(); });
   $("tHome").addEventListener("click", function () { show("dash"); });
-  $("goGame").addEventListener("click", function () { show("game"); startGame(); });
+  $("goGame").addEventListener("click", function () { show("games"); });
+  $("goLetterGame").addEventListener("click", function () { show("game"); startGame(); });
+  $("goPattern").addEventListener("click", function () { show("phub"); paintHub(); });
+  $("pbLearn").addEventListener("click", function () { show("lesson"); startLesson(); });
+  $("pbCopy").addEventListener("click", function () { show("copy"); startCopy(); });
+  $("pbNext").addEventListener("click", function () { show("pattern"); startPattern(); });
+  $("phHome").addEventListener("click", function () { show("games"); });
+  $("lBack").addEventListener("click", function () { show("phub"); paintHub(); });
+  $("cBack").addEventListener("click", function () { show("phub"); paintHub(); });
+  $("gmHome").addEventListener("click", function () { show("dash"); });
+  $("goStickers").addEventListener("click", function () { show("stickers"); buildStickers(); });
+  $("stHome").addEventListener("click", function () { show("dash"); });
+  $("ptHome").addEventListener("click", function () { show("phub"); paintHub(); });
   $("lHome").addEventListener("click", function () { show("dash"); });
   $("pHome").addEventListener("click", function () { show("tgrid"); });
-  $("gHome").addEventListener("click", function () { show("dash"); });
+  $("gHome").addEventListener("click", function () { show("games"); });
 
   // ---------- Draw ----------
   var PAPER = "#fffdf7";
@@ -1150,7 +1362,7 @@
   buildTools();
 
   // ---------- Game: find the letter ----------
-  var stars = 0, target = null, locked = false, gameTimer;
+  var stars = 0, target = null, locked = false, gMiss = false, gameTimer;
 
   function randLetter() { return WORDS[Math.floor(Math.random() * WORDS.length)][0]; }
 
@@ -1167,7 +1379,7 @@
   }
 
   function nextRound() {
-    locked = false;
+    locked = false; gMiss = false;
     var prev = target, t = randLetter();
     while (t === prev) t = randLetter();
     target = t;
@@ -1200,11 +1412,11 @@
     if (ch === target) {
       locked = true;
       stars++; $("score").textContent = String(stars);
-      confetti();
-      say(praise());
       clearTimeout(gameTimer);
-      gameTimer = setTimeout(nextRound, 1800);
+      win("listen", { el: btn, missed: gMiss, after: function () { clearTimeout(gameTimer); gameTimer = setTimeout(nextRound, 400); } });
+      gameTimer = setTimeout(nextRound, 20000);   // safety net
     } else {
+      gMiss = true;
       btn.classList.remove("shake");
       void btn.offsetWidth;            // restart the shake
       btn.classList.add("shake");
@@ -1214,6 +1426,633 @@
     }
   }
   $("listen").addEventListener("click", askAgain);
+
+  // ---------- Rewards ----------
+  // Every real success gets a tiny, instant reward (a soft chime, a sparkle, and a
+  // specific line from the voice) plus one star. Stickers are a surprise at
+  // spaced-out star totals, so they stay special. Nothing is ever taken away.
+  var REWARD_KEY = "letters-rewards";
+  var STICKERS = [
+    ["Turtle", "🐢"], ["Ladybug", "🐞"], ["Butterfly", "🦋"], ["Bee", "🐝"],
+    ["Octopus", "🐙"], ["Owl", "🦉"], ["Penguin", "🐧"], ["Dolphin", "🐬"],
+    ["Unicorn", "🦄"], ["Rocket", "🚀"], ["Train", "🚂"], ["Tractor", "🚜"],
+    ["Fire truck", "🚒"], ["Helicopter", "🚁"], ["Sunflower", "🌻"], ["Rainbow", "🌈"],
+    ["Strawberry", "🍓"], ["Cookie", "🍪"], ["Balloon", "🎈"], ["Trumpet", "🎺"],
+    ["Drum", "🥁"], ["Teddy bear", "🧸"], ["Soccer ball", "⚽"], ["Dinosaur", "🦕"],
+    ["Whale", "🐳"], ["Elephant", "🐘"], ["Lion", "🦁"], ["Panda", "🐼"],
+    ["Frog", "🐸"], ["Sailboat", "⛵"]
+  ];
+  // One-time stickers for big learning moments.
+  var SPECIALS = {
+    lesson:  ["Pattern Learner", "🎓"],
+    alpha:   ["ABC Champion", "🏆"],
+    levelup: ["Puzzle Master", "🧩"]
+  };
+  var FRIENDS = ["🐰", "🐻", "🐱", "🐶", "🐥", "🦊", "🐸"];
+
+  var rw = { stars: 0, got: [] };
+  try {
+    var rw0 = JSON.parse(localStorage.getItem(REWARD_KEY) || "null");
+    if (rw0 && typeof rw0.stars === "number" && Array.isArray(rw0.got)) rw = rw0;
+  } catch (e) {}
+  function saveRw() { try { localStorage.setItem(REWARD_KEY, JSON.stringify(rw)); } catch (e) {} }
+
+  var rewardToken = 0, rewardTimer = 0, sinceFriend = 0, winsThisVisit = 0;
+
+  function reducedMotion() {
+    return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+  function withArticle(name) {
+    var a = (/^[aeiou]/i.test(name) && !/^uni/i.test(name)) ? "An " : "A ";
+    return a + name.toLowerCase();
+  }
+  function stickerOf(id) {
+    if (id.indexOf("s:") === 0) {
+      var sp = SPECIALS[id.slice(2)];
+      return { id: id, name: sp[0], icon: sp[1], say: sp[0] };
+    }
+    var pl = STICKERS[parseInt(id.slice(1), 10)];
+    return { id: id, name: pl[0], icon: pl[1], say: withArticle(pl[0]) };
+  }
+  // Stars needed before sticker number k+1: 5, 8, 12, 17, 23 ... then further and further apart.
+  function nextThreshold(k) { return Math.round(5 + 3 * k + 0.35 * k * k); }
+  function poolCount() { return rw.got.filter(function (g) { return g.charAt(0) === "p"; }).length; }
+
+  function paintStars() {
+    $("cardStars").textContent = "⭐ " + rw.stars;
+    $("stkStars").textContent = String(rw.stars);
+  }
+
+  // Add one star. Returns any stickers just earned.
+  function earnStar(special) {
+    var out = [], k = poolCount(), i;
+    rw.stars++;
+    if (k < STICKERS.length && rw.stars >= nextThreshold(k)) {
+      var free = [];
+      for (i = 0; i < STICKERS.length; i++) if (rw.got.indexOf("p" + i) < 0) free.push(i);
+      var chosen = free[pRand(free.length)];
+      rw.got.push("p" + chosen);
+      out.push(stickerOf("p" + chosen));
+    }
+    if (special && SPECIALS[special] && rw.got.indexOf("s:" + special) < 0) {
+      rw.got.push("s:" + special);
+      out.unshift(stickerOf("s:" + special));
+    }
+    saveRw(); paintStars();
+    return out;
+  }
+
+  // ----- sound -----
+  var actx = null;
+  function tone(freq, t0, dur, vol) {
+    var now = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+    o.type = "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, now + t0);
+    g.gain.exponentialRampToValueAtTime(vol, now + t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + t0 + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(now + t0); o.stop(now + t0 + dur + 0.05);
+  }
+  // "tick" = a stroke of a letter was finished, "star" = a success, "sticker" = a new sticker.
+  function chime(kind, idx) {
+    if (!REWARD_SOUNDS) return;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!actx) actx = new AC();
+      if (actx.state === "suspended" && actx.resume) actx.resume();
+      var notes = {
+        tick:    [[700 + 90 * (idx || 0), 0, 0.2, 0.07]],
+        star:    [[659, 0, 0.16, 0.09], [988, 0.1, 0.28, 0.09]],
+        sticker: [[523, 0, 0.18, 0.1], [659, 0.14, 0.18, 0.1], [784, 0.28, 0.18, 0.1], [1047, 0.42, 0.45, 0.1]]
+      }[kind];
+      notes.forEach(function (n) { tone(n[0], n[1], n[2], n[3]); });
+    } catch (e) {}
+  }
+
+  // ----- little visual rewards -----
+  function centerOf(el) {
+    var r = el && el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+    if (!r || (!r.width && !r.height)) return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+  function sparkle(x, y, n) {
+    if (reducedMotion()) return;
+    for (var i = 0; i < n; i++) {
+      var sp = document.createElement("span"), ang = Math.PI * 2 * i / n + Math.random(), dist = 40 + Math.random() * 40;
+      sp.className = "spark"; sp.textContent = "✨";
+      sp.style.left = x + "px"; sp.style.top = y + "px";
+      sp.style.setProperty("--dx", Math.cos(ang) * dist + "px");
+      sp.style.setProperty("--dy", Math.sin(ang) * dist + "px");
+      document.body.appendChild(sp);
+      setTimeout(function (el) { el.remove(); }, 900, sp);
+    }
+  }
+  function starFloat(x, y) {
+    if (reducedMotion()) return;
+    var f = document.createElement("span");
+    f.className = "starfloat"; f.textContent = "⭐ +1";
+    f.style.left = x + "px"; f.style.top = y + "px";
+    document.body.appendChild(f);
+    setTimeout(function () { f.remove(); }, 1100);
+  }
+  // A rare, silent surprise: an animal friend runs across the bottom. It has no value
+  // and can't be collected, so there is nothing to chase.
+  function maybeFriend() {
+    if (!REWARD_FRIENDS || reducedMotion()) return;
+    if (winsThisVisit < 3 || sinceFriend < 4 || Math.random() > 0.2) return;
+    sinceFriend = 0;
+    var f = document.createElement("span");
+    f.className = "friend"; f.textContent = FRIENDS[pRand(FRIENDS.length)];
+    document.body.appendChild(f);
+    setTimeout(function () { f.remove(); }, 2800);
+  }
+
+  // The instant part: chime, sparkle, one star. Returns { stickers: [...] }.
+  // noStar = replaying something he already got: the chime and sparkle, but no new star.
+  function rewardNow(el, kind, special, noStar) {
+    var c = centerOf(el), earned = [];
+    chime("star");
+    sparkle(c.x, c.y, 8);
+    if (!noStar) {
+      starFloat(c.x, c.y);
+      earned = earnStar(special);
+      winsThisVisit++; sinceFriend++;
+      maybeFriend();
+    }
+    return { stickers: earned };
+  }
+
+  // The voice part: one specific line, then any new sticker, then carry on.
+  function rewardSay(kind, missed, res, after, line) {
+    var tk = ++rewardToken, fired = false;
+    function next() {
+      if (fired || tk !== rewardToken) return;
+      fired = true; clearTimeout(rewardTimer);
+      showStickers(res.stickers, after);
+    }
+    say(line || praiseFor(kind, missed), next);
+    clearTimeout(rewardTimer);
+    rewardTimer = setTimeout(next, 3800);
+  }
+
+  function win(kind, o) {
+    o = o || {};
+    var res = rewardNow(o.el, kind, o.special);
+    rewardSay(kind, !!o.missed, res, o.after, o.line);
+    return res;
+  }
+
+  // The big moment: a new sticker pops up. Tap anywhere (or wait) to continue.
+  function showStickers(list, after) {
+    if (!list || !list.length) { if (after) after(); return; }
+    var st = list[0], rest = list.slice(1), closed = false, tk = rewardToken, pop = $("stickerPop");
+    $("spIcon").textContent = st.icon;
+    $("spName").textContent = st.name;
+    pop.hidden = false;
+    confetti();
+    chime("sticker");
+    function close() {
+      if (closed) return;
+      closed = true;
+      clearTimeout(rewardTimer);
+      pop.hidden = true; pop.onclick = null;
+      if (tk !== rewardToken) return;
+      showStickers(rest, after);
+    }
+    pop.onclick = close;
+    say("You found a new sticker, " + KID_NAME + "! " + st.say + "!", function () {
+      if (!closed) { clearTimeout(rewardTimer); rewardTimer = setTimeout(close, 900); }
+    });
+    clearTimeout(rewardTimer);
+    rewardTimer = setTimeout(close, 6500);
+  }
+
+  function buildStickers() {
+    var box = $("stkGrid");
+    box.innerHTML = "";
+    $("stkHint").textContent = rw.got.length ? "" : "Stickers will show up here as you learn.";
+    rw.got.slice().reverse().forEach(function (id) {
+      var st = stickerOf(id), b = document.createElement("button");
+      var ic = document.createElement("span"), nm = document.createElement("span");
+      b.className = "stk"; b.setAttribute("aria-label", st.name);
+      ic.className = "stkIcon"; ic.textContent = st.icon;
+      nm.className = "stkName"; nm.textContent = st.name;
+      b.appendChild(ic); b.appendChild(nm);
+      b.addEventListener("click", function () {
+        say(st.say);
+        b.classList.remove("bounce"); void b.offsetWidth; b.classList.add("bounce");
+      });
+      box.appendChild(b);
+    });
+  }
+
+  // ---------- Game: patterns (what comes next?) ----------
+  var P_THEMES = {
+    colors: [
+      { name: "red", color: "#ef476f" }, { name: "blue", color: "#2f9bff" },
+      { name: "yellow", color: "#ffd23f" }, { name: "green", color: "#5fb840" },
+      { name: "purple", color: "#7b5cff" }, { name: "orange", color: "#ff8a1f" }
+    ],
+    animals: [
+      { name: "dog", icon: "\uD83D\uDC36" }, { name: "cat", icon: "\uD83D\uDC31" },
+      { name: "frog", icon: "\uD83D\uDC38" }, { name: "chick", icon: "\uD83D\uDC25" },
+      { name: "pig", icon: "\uD83D\uDC37" }, { name: "cow", icon: "\uD83D\uDC2E" }
+    ],
+    fruit: [
+      { name: "apple", icon: "\uD83C\uDF4E" }, { name: "banana", icon: "\uD83C\uDF4C" },
+      { name: "grapes", icon: "\uD83C\uDF47" }, { name: "strawberry", icon: "\uD83C\uDF53" },
+      { name: "orange", icon: "\uD83C\uDF4A" }, { name: "watermelon", icon: "\uD83C\uDF49" }
+    ]
+  };
+  // Each pattern is a short unit that repeats: AB = red blue red blue...
+  var P_SHAPES = { AB: [0, 1], AAB: [0, 0, 1], ABB: [0, 1, 1], ABC: [0, 1, 2], AABB: [0, 0, 1, 1] };
+  // Which patterns appear at each level. Level 1 is the easiest.
+  var P_LEVELS = [null, ["AB"], ["AAB", "ABB"], ["ABC"], ["AB", "AAB", "ABB", "ABC", "AABB"]];
+  var P_STREAK_TO_LEVEL_UP = 3;
+
+  var pLevel = 1, pStreak = 0, pStars = 0, pLocked = false, pWrong = 0, pRound = null, pTimer;
+  try { pLevel = Math.max(1, Math.min(4, parseInt(localStorage.getItem("patterns-level") || "1", 10) || 1)); } catch (e) {}
+
+  function pRand(n) { return Math.floor(Math.random() * n); }
+  function pShuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = pRand(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  function newPattern(level, repeats) {
+    var kinds = P_LEVELS[level || pLevel];
+    var unit = P_SHAPES[kinds[pRand(kinds.length)]];
+    var len = unit.length, types = Math.max.apply(null, unit) + 1;
+    var keys = Object.keys(P_THEMES);
+    var pool = pShuffle(P_THEMES[keys[pRand(keys.length)]]);
+    var picks = pool.slice(0, types), extras = pool.slice(types);
+    var shown = repeats ? len * repeats : Math.min(8, Math.max(4, len * 2 + pRand(len)));
+    var seq = [];
+    for (var i = 0; i < shown; i++) seq.push(picks[unit[i % len]]);
+    var answer = picks[unit[shown % len]];
+    var choices = picks.slice();
+    while (choices.length < 3) choices.push(extras.shift());
+    return { seq: seq, answer: answer, choices: pShuffle(choices), picks: picks };
+  }
+
+  function pItemEl(it, cls) {
+    var el = document.createElement("span");
+    el.className = cls;
+    if (it.color) {
+      var d = document.createElement("i");
+      d.className = "pdot"; d.style.background = it.color;
+      el.appendChild(d);
+    } else {
+      el.textContent = it.icon;
+    }
+    return el;
+  }
+
+  function pNames() { return pRound.seq.map(function (it) { return it.name; }).join(", "); }
+  function pSay() { if (pRound) say(pNames() + ". What comes next?"); }
+
+  function pRender() {
+    var box = $("pseq");
+    box.innerHTML = "";
+    pRound.seq.forEach(function (it) { box.appendChild(pItemEl(it, "pitem")); });
+    var slot = document.createElement("span");
+    slot.className = "pitem slot"; slot.id = "pslot"; slot.textContent = "?";
+    box.appendChild(slot);
+
+    var ch = $("pchoices");
+    ch.innerHTML = "";
+    pRound.choices.forEach(function (it) {
+      var b = document.createElement("button");
+      b.className = "choice";
+      b.setAttribute("aria-label", it.name);
+      b.appendChild(pItemEl(it, "pface"));
+      b._item = it;
+      b.addEventListener("click", function () { pChoose(it, b); });
+      ch.appendChild(b);
+    });
+  }
+
+  function pNext() {
+    pLocked = false; pWrong = 0;
+    pRound = newPattern();
+    pRender();
+    clearTimeout(pTimer);
+    pTimer = setTimeout(pSay, 400);
+  }
+
+  function startPattern() {
+    pStars = 0; pStreak = 0;
+    $("pscore").textContent = "0";
+    pNext();
+  }
+
+  function pSaveLevel() { try { localStorage.setItem("patterns-level", String(pLevel)); } catch (e) {} }
+
+  function pChoose(it, btn) {
+    if (pLocked) return;
+    if (it === pRound.answer) {
+      pLocked = true;
+      pStars++; $("pscore").textContent = String(pStars);
+      pStreak++;
+      var leveled = false;
+      if (pStreak >= P_STREAK_TO_LEVEL_UP && pLevel < 4) { pLevel++; pStreak = 0; pSaveLevel(); leveled = true; }
+
+      var slot = $("pslot"), filled = pItemEl(it, "pitem fill");
+      slot.parentNode.replaceChild(filled, slot);
+      var res = rewardNow(filled, "pattern", leveled ? "levelup" : null);
+
+      // Say the whole pattern with the answer, then praise what he did, then move on.
+      var advance = function () { clearTimeout(pTimer); pTimer = setTimeout(pNext, 600); };
+      var missed = pWrong > 0;
+      var praiseIt = function () { rewardSay("pattern", missed, res, advance); };
+      if ("speechSynthesis" in window) say(pNames() + ", " + it.name + "!", praiseIt); else praiseIt();
+      clearTimeout(pTimer);
+      pTimer = setTimeout(pNext, 20000);   // safety net
+    } else {
+      btn.classList.remove("shake"); void btn.offsetWidth; btn.classList.add("shake");
+      pStreak = 0; pWrong++;
+      if (pWrong >= 2) {   // after two misses, glow the right answer
+        var all = $("pchoices").children;
+        for (var i = 0; i < all.length; i++) if (all[i]._item === pRound.answer) all[i].classList.add("hint");
+      }
+      say(retry(), pSay);
+    }
+  }
+  $("plisten").addEventListener("click", pSay);
+
+  // ---------- Patterns: learn what a pattern is ----------
+  var lessonToken = 0, lTimer = 0, lStepNo = 0, lWrong = 0, lLocked = false, lessonDone = false;
+  try { lessonDone = localStorage.getItem("patterns-lesson") === "1"; } catch (e) {}
+  var PC = P_THEMES.colors, PA = P_THEMES.animals;   // PC[0] red, PC[1] blue, ...
+  // A lesson step earns a star only the first time through, so tapping "Again" can't farm stars.
+  var lRewarded = {};
+  function lReward(step, el, special) {
+    var first = !lRewarded[step];
+    lRewarded[step] = true;
+    return rewardNow(el, "pattern", special, !first);
+  }
+
+  function paintHub() {
+    $("plearnLbl").textContent = lessonDone ? "1. Learn ⭐" : "1. Learn";
+    $("pbLearn").classList.toggle("glow", !lessonDone);
+    $("phint").textContent = lessonDone ? "" : "Start with number 1!";
+  }
+
+  function lStop() { lessonToken++; clearTimeout(lTimer); }
+  function lAfter(ms, fn) {
+    var t = lessonToken;
+    clearTimeout(lTimer);
+    lTimer = setTimeout(function () { if (t === lessonToken) fn(); }, ms);
+  }
+  // Say something, then carry on when the voice finishes (or after a safety delay).
+  function lSay(text, next) {
+    var t = lessonToken, fired = false;
+    function go() {
+      if (fired || t !== lessonToken) return;
+      fired = true; clearTimeout(lTimer);
+      if (next) next();
+    }
+    say(text, go);
+    clearTimeout(lTimer);
+    lTimer = setTimeout(go, 1800 + text.length * 110);
+  }
+  function lCap(t) { $("lcap").textContent = t; }
+  function lAdd(it, cls) {
+    var el = pItemEl(it, "pitem" + (cls ? " " + cls : ""));
+    $("lrow").appendChild(el);
+    return el;
+  }
+  function lReady(label, fn) {
+    var b = document.createElement("button");
+    b.className = "big"; b.textContent = label;
+    b.addEventListener("click", fn);
+    $("lbtns").appendChild(b);
+    return b;
+  }
+  function lNextBtn() { lReady("Next →", function () { lGo(lStepNo + 1); }); }
+  function lDots() {
+    var d = $("ldots").children;
+    for (var i = 0; i < d.length; i++) d[i].classList.toggle("on", i <= lStepNo);
+  }
+  // Show items one at a time, saying each name.
+  function lReveal(list, i, done) {
+    if (i >= list.length) { lAfter(300, done); return; }
+    lAdd(list[i], "fill");
+    lSay(list[i].name, function () { lAfter(150, function () { lReveal(list, i + 1, done); }); });
+  }
+  function lShake(el) { el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+
+  var L_STEP_FNS = [
+    // 1. What a pattern is
+    function () {
+      lCap("A pattern repeats!");
+      lSay("Let's learn about patterns!", function () {
+        lReveal([PC[0], PC[1], PC[0], PC[1], PC[0], PC[1]], 0, function () {
+          lSay("See? Red, blue, red, blue, red, blue. The same things come back again and again. That is a pattern!", lNextBtn);
+        });
+      });
+    },
+    // 2. Find the part that repeats
+    function () {
+      lCap("Look for the repeat");
+      var seq = [PC[0], PC[1], PC[0], PC[1], PC[0], PC[1]];
+      var els = seq.map(function (it) { return lAdd(it); });
+      function clearHl() { els.forEach(function (e) { e.classList.remove("hl"); }); }
+      function pair(i) {
+        clearHl();
+        if (i > 2) { lSay("It goes red, blue, again and again. It repeats!", lNextBtn); return; }
+        els[i * 2].classList.add("hl"); els[i * 2 + 1].classList.add("hl");
+        lSay("Red, blue.", function () { lAfter(250, function () { pair(i + 1); }); });
+      }
+      lAfter(300, function () { pair(0); });
+    },
+    // 3. Patterns can be anything
+    function () {
+      lCap("Patterns can be animals!");
+      lSay("Patterns can be made with anything. Like animals!", function () {
+        lReveal([PA[0], PA[1], PA[0], PA[1], PA[0], PA[1]], 0, function () {
+          lSay("Dog, cat, dog, cat. It repeats. It is a pattern!", lNextBtn);
+        });
+      });
+    },
+    // 4. Which one is a pattern?
+    function () {
+      lCap("Which one is a pattern?");
+      var good = [PC[0], PC[1], PC[0], PC[1], PC[0], PC[1]];
+      var bad = pShuffle(PC);   // six different colors: nothing repeats
+      pShuffle([{ items: good, ok: true }, { items: bad, ok: false }]).forEach(function (r) {
+        var b = document.createElement("button");
+        b.className = "prow";
+        b.setAttribute("aria-label", r.ok ? "A row that repeats" : "A row that does not repeat");
+        r.items.forEach(function (it) { b.appendChild(pItemEl(it, "pitem")); });
+        b._ok = r.ok;
+        b.addEventListener("click", function () { lPick(b); });
+        $("lopts").appendChild(b);
+      });
+      lSay("Which one is a pattern? Which one repeats? Tap it!", null);
+    },
+    // 5. Your turn (the right answer glows)
+    function () {
+      lCap("Your turn!");
+      [PC[0], PC[1], PC[0], PC[1], PC[0]].forEach(function (it) { lAdd(it); });
+      var slot = document.createElement("span");
+      slot.className = "pitem slot"; slot.id = "lslot"; slot.textContent = "?";
+      $("lrow").appendChild(slot);
+      pShuffle([PC[1], PC[0], PC[3]]).forEach(function (it) {
+        var b = document.createElement("button");
+        b.className = "choice" + (it === PC[1] ? " hint" : "");
+        b.setAttribute("aria-label", it.name);
+        b.appendChild(pItemEl(it, "pface"));
+        b.addEventListener("click", function () { lTry(it, b); });
+        $("lopts").appendChild(b);
+      });
+      lSay("Your turn! Red, blue, red, blue, red. What comes next? Tap the blue one!", null);
+    },
+    // 6. Done
+    function () {
+      lCap("You know patterns!");
+      lessonDone = true;
+      var lessonRes = lReward(5, $("lcap"), "lesson");
+      try { localStorage.setItem("patterns-lesson", "1"); } catch (e) {}
+      lReady("Copy it", function () { show("copy"); startCopy(); });
+      lReady("What's next?", function () { show("pattern"); startPattern(); });
+      lSay("You did it, " + KID_NAME + "! A pattern repeats again and again. Now let's play with patterns!", function () { showStickers(lessonRes.stickers); });
+    }
+  ];
+
+  function lPick(b) {
+    if (lLocked) return;
+    if (b._ok) {
+      lLocked = true;
+      var rp = lReward(3, b);
+      lSay("Yes! This one repeats. Red, blue, red, blue. That is a pattern! The other one does not repeat.", function () { showStickers(rp.stickers, lNextBtn); });
+    } else {
+      lShake(b); lWrong++;
+      if (lWrong >= 2) {
+        var rows = $("lopts").children;
+        for (var i = 0; i < rows.length; i++) if (rows[i]._ok) rows[i].classList.add("hint");
+      }
+      lSay("Hmm. Look again. Which one repeats?", null);
+    }
+  }
+
+  function lTry(it, b) {
+    if (lLocked) return;
+    if (it === PC[1]) {
+      lLocked = true;
+      var slot = $("lslot"), filledL = pItemEl(it, "pitem fill");
+      slot.parentNode.replaceChild(filledL, slot);
+      var rt = lReward(4, filledL);
+      lSay(praiseFor("pattern", lWrong > 0), function () {
+        showStickers(rt.stickers, function () { lAfter(400, function () { lGo(5); }); });
+      });
+    } else {
+      lShake(b); lWrong++;
+      lSay("Tap the blue one. It is glowing!", null);
+    }
+  }
+
+  function lGo(n) {
+    lStop();
+    lStepNo = n; lWrong = 0; lLocked = false;
+    $("lrow").innerHTML = ""; $("lopts").innerHTML = ""; $("lbtns").innerHTML = "";
+    lDots();
+    L_STEP_FNS[n]();
+  }
+  function startLesson() {
+    lRewarded = {};
+    var d = $("ldots");
+    if (!d.children.length) for (var i = 0; i < L_STEP_FNS.length; i++) d.appendChild(document.createElement("i"));
+    lGo(0);
+  }
+  $("lagain").addEventListener("click", function () { lGo(lStepNo); });
+
+  // ---------- Patterns: copy it ----------
+  var cLevel = 1, cStreak = 0, cStars = 0, cRound = null, cPos = 0, cLocked = false, cWrong = 0, cMiss = false, cTimer = 0;
+  try { cLevel = Math.max(1, Math.min(3, parseInt(localStorage.getItem("patterns-copy-level") || "1", 10) || 1)); } catch (e) {}
+
+  function cNames() { return cRound.seq.map(function (it) { return it.name; }).join(", "); }
+  function cSay() { if (cRound) say(cNames() + ". Can you copy it? Tap the same ones, in the same order."); }
+
+  // Outline the item in the top row that he should copy next.
+  function cMark() {
+    var t = $("cseq").children;
+    for (var i = 0; i < t.length; i++) t[i].classList.toggle("hl", i === cPos);
+  }
+
+  function cRender() {
+    var top = $("cseq"), mine = $("cmine"), pal = $("cpal");
+    top.innerHTML = ""; mine.innerHTML = ""; pal.innerHTML = "";
+    cRound.seq.forEach(function (it) {
+      top.appendChild(pItemEl(it, "pitem"));
+      var slot = document.createElement("span");
+      slot.className = "pitem slot";
+      mine.appendChild(slot);
+    });
+    cRound.palette.forEach(function (it) {
+      var b = document.createElement("button");
+      b.className = "choice";
+      b.setAttribute("aria-label", it.name);
+      b.appendChild(pItemEl(it, "pface"));
+      b._item = it;
+      b.addEventListener("click", function () { cChoose(it, b); });
+      pal.appendChild(b);
+    });
+    cMark();
+  }
+
+  function cNextRound() {
+    cLocked = false; cWrong = 0; cPos = 0; cMiss = false;
+    var o = newPattern(cLevel, 2);
+    cRound = { seq: o.seq, palette: pShuffle(o.picks) };
+    cRender();
+    clearTimeout(cTimer);
+    cTimer = setTimeout(cSay, 400);
+  }
+
+  function startCopy() {
+    cStars = 0; cStreak = 0;
+    $("cscore").textContent = "0";
+    cNextRound();
+  }
+
+  function cChoose(it, btn) {
+    if (cLocked) return;
+    var want = cRound.seq[cPos], i, all = $("cpal").children;
+    if (it === want) {
+      var mine = $("cmine");
+      mine.replaceChild(pItemEl(it, "pitem fill"), mine.children[cPos]);
+      cPos++; cWrong = 0;
+      for (i = 0; i < all.length; i++) all[i].classList.remove("hint");
+      cMark();
+      if (cPos >= cRound.seq.length) {
+        cLocked = true;
+        cStars++; $("cscore").textContent = String(cStars);
+        var leveledC = false;
+        if (cMiss) cStreak = 0;
+        else if (++cStreak >= 3 && cLevel < 3) {
+          cLevel++; cStreak = 0; leveledC = true;
+          try { localStorage.setItem("patterns-copy-level", String(cLevel)); } catch (e) {}
+        }
+        var resC = rewardNow(mine, "copy", leveledC ? "levelup" : null);
+        clearTimeout(cTimer);
+        rewardSay("copy", cMiss, resC, function () { clearTimeout(cTimer); cTimer = setTimeout(cNextRound, 600); });
+        cTimer = setTimeout(cNextRound, 20000);   // safety net
+      } else {
+        say(it.name);
+      }
+    } else {
+      cMiss = true; cWrong++;
+      lShake(btn);
+      if (cWrong >= 2) {
+        for (i = 0; i < all.length; i++) if (all[i]._item === want) all[i].classList.add("hint");
+      }
+      say("Look at the top row. Which one is next?");
+    }
+  }
+  $("clisten").addEventListener("click", cSay);
 
   // ---------- Recorder (grown-ups only: open index.html#record) ----------
   var R = { letter: "A", stream: null, mr: null, chunks: [], wav: null, recording: false, timer: 0, saved: {} };
@@ -1371,6 +2210,7 @@
   $("modeLearn").classList.toggle("sel", mode === "learn");
   $("learnReset").hidden = mode !== "learn";
   paintSoundBtns();
+  paintStars();
   buildGrid();
   buildTraceGrid();
   route();
